@@ -63,7 +63,7 @@ class SquaredError: public Objective {
 
 //DECLARE_OBJECTIVE_REGISTRATION(SquaredError)
 
-Objective* create__SquaredError();
+//Objective* create__SquaredError();
 
 ///////////////////////////////////////////////////////////////////////
 // Two class classification

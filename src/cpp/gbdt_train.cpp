@@ -15,6 +15,8 @@
 
 using namespace gbdt;
 
+Objective* create__SquaredError() { return new SquaredError(); }
+
 int main(int argc, char *argv[]) {
   CmdOption opt;
   opt.AddOption("threads", "t", "threads", 4);
