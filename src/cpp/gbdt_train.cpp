@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Start registering\n" << std::endl;
   using CreateFn = Objective* (*) ();
-  LossFactory::GetInstance()->Register("SquaredError", (CreateFn) new SquaredError);        \
+  LossFactory::GetInstance()->Register("SquaredError", create__SquaredError);        \
   std::cout << "Getting...\n" << std::endl;
   Objective *objective = LossFactory::GetInstance()->Create(loss_type);
   std::cout << "Checking...\n" << std::endl;

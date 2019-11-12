@@ -10,4 +10,7 @@ namespace gbdt {
 //DEFINE_OBJECTIVE_REGISTRATION(LAD)
 
 
+  Objective* create__SquaredError() { return new SquaredError(); }
+
+
 }  // gbdt

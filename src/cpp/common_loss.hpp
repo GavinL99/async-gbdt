@@ -61,7 +61,9 @@ class SquaredError: public Objective {
   }
 };
 
-DECLARE_OBJECTIVE_REGISTRATION(SquaredError)
+//DECLARE_OBJECTIVE_REGISTRATION(SquaredError)
+
+Objective* create__SquaredError();
 
 ///////////////////////////////////////////////////////////////////////
 // Two class classification
@@ -124,7 +126,7 @@ class LogLoss: public Objective {
   }
 };
 
-DECLARE_OBJECTIVE_REGISTRATION(LogLoss)
+//DECLARE_OBJECTIVE_REGISTRATION(LogLoss)
 //DEFINE_OBJECTIVE_CREATOR(LogLoss)
 //void register__LogLoss(void) {                                        \
 //  LossFactory::GetInstance()->Register("LogLoss", create__LogLoss);        \
@@ -170,7 +172,7 @@ class LAD: public Objective {
   }
 };
 
-DECLARE_OBJECTIVE_REGISTRATION(LAD)
+//DECLARE_OBJECTIVE_REGISTRATION(LAD)
 
 }  // gbdt
 

@@ -43,10 +43,10 @@ class LossFactory {
   void register__ ## CLZ(void) __attribute__ ((constructor));
 #endif
 
-#ifndef DEFINE_OBJECTIVE_CREATOR
-#define DEFINE_OBJECTIVE_CREATOR(CLZ)                           \
-  static Objective* create__ ## CLZ() { return new CLZ(); }
-#endif
+//#ifndef DEFINE_OBJECTIVE_CREATOR
+//#define DEFINE_OBJECTIVE_CREATOR(CLZ)                           \
+//  static Objective* create__ ## CLZ() { return new CLZ(); }
+//#endif
 
 //#ifndef DEFINE_OBJECTIVE_REGISTRATION
 //#define DEFINE_OBJECTIVE_REGISTRATION(CLZ)                              \
