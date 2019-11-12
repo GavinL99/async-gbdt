@@ -75,12 +75,12 @@ We plan to achieve the following by the given dates:
 | 12/06    | Comparison analysis, write-up and poster |
 
 
-* Gradient Boosting Regression Tree
-** Quick Start
+# Gradient Boosting Regression Tree
+## Quick Start
 + Download the code: =git clone https://github.com/qiyiping/gbdt.git=
 + Run =make= to compile
 + Run the demo script in `test`: =./demo.sh=
-** Data Format
+## Data Format
 [InitalGuess] Label Weight Index0:Value0 Index1:Value1 ..
 
 Each line contains an instance and is ended by a '\n' character.
@@ -88,7 +88,7 @@ Inital guess is optional. For two-class classification, Label is -1
 or 1. For regression, Label is the target value, which can be any
 real number. Feature Index starts from 0. Feature Value can be any
 real number.
-** Training Configuration
+## Training Configuration
 #+BEGIN_SRC C++
 class Configure {
  public:
@@ -111,7 +111,7 @@ class Configure {
 ...
 };
 #+END_SRC
-** Reference
+## Reference
 + Friedman, J. H. "Greedy Function Approximation: A Gradient Boosting Machine." (February 1999)
 + Friedman, J. H. "Stochastic Gradient Boosting." (March 1999)
 + Jerry Ye, et al. (2009). Stochastic gradient boosted distributed
