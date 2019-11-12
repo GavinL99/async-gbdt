@@ -75,7 +75,7 @@ We plan to achieve the following by the given dates:
 | 12/06    | Comparison analysis, write-up and poster |
 
 
-# Gradient Boosting Regression Tree
+## Gradient Boosting Regression Tree
 ## Quick Start
 + Download the code: =git clone https://github.com/qiyiping/gbdt.git=
 + Run =make= to compile
