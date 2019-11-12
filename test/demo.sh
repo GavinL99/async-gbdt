@@ -43,7 +43,7 @@ cmd="../src/cpp/gbdt_train --feature_size ${feature_size} \
                            --min_leaf_size ${min_leaf_size} \
                            --loss ${loss} \
                            --num_of_threads ${num_of_threads}"
-
+echo $cmd
 time $cmd
 
 echo -------------------

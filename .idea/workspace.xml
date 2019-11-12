@@ -9,7 +9,28 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5aa07bed-f8b0-4b8b-bc92-e422e44fbc49" name="Default Changelist" comment="" />
+    <list default="true" id="5aa07bed-f8b0-4b8b-bc92-e422e44fbc49" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/auc.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/auc.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/common_loss.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/common_loss.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/config.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/config.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/data.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/data.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/data_unittest" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/data_unittest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/gbdt.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/gbdt.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/gbdt_predict" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/gbdt_predict" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/gbdt_train" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/gbdt_train" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/libgbdt.a" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/libgbdt.a" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/loss.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/loss.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/loss_unittest" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/loss_unittest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/math_util.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/math_util.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/metrics.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/metrics.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/time.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/time.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/tree.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/tree.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/tree_unittest" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/tree_unittest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpp/util.o" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpp/util.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/demo.sh" beforeDir="false" afterPath="$PROJECT_DIR$/test/demo.sh" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +48,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectId" id="1TWjzc3iAKCmPHvO8FTZhSoTxWL" />
@@ -42,6 +63,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -66,6 +88,7 @@
       <option name="presentableId" value="Default" />
       <updated>1573583008761</updated>
       <workItem from="1573583012918" duration="3099000" />
+      <workItem from="1573587174832" duration="676000" />
     </task>
     <servers />
   </component>
@@ -77,7 +100,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
