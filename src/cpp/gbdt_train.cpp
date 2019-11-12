@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
 
   using CreateFn = Objective* (*) ();
   LossFactory::GetInstance()->Register("SquaredError", (CreateFn) new SquaredError());        \
+
   Objective *objective = LossFactory::GetInstance()->Create(loss_type);
   if (!objective) {
     LossFactory::GetInstance()->PrintAllCandidates();

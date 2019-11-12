@@ -44,10 +44,10 @@ RM = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/liuguanfu/WorkSpace/15618/gbdt/src/cpp
+CMAKE_SOURCE_DIR = /Users/liuguanfu/WorkSpace/gbdt/src/cpp
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/liuguanfu/WorkSpace/15618/gbdt/src/cpp/cmake-build-debug
+CMAKE_BINARY_DIR = /Users/liuguanfu/WorkSpace/gbdt/src/cpp/cmake-build-debug
 
 #=============================================================================
 # Directory level rules for the build root directory

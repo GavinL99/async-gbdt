@@ -9,16 +9,5 @@ namespace gbdt {
 //
 //DEFINE_OBJECTIVE_REGISTRATION(LAD)
 
-//void register__SquaredError(void) {                                        \
-//  LossFactory::GetInstance()->Register("SquaredError", (CreateFn) new SquaredError());        \
-//}
-//
-//void register__LogLoss(void) {                                        \
-//  LossFactory::GetInstance()->Register("LogLoss", (CreateFn) new LogLoss());        \
-//}
-//
-//void register__LAD(void) {                                        \
-//  LossFactory::GetInstance()->Register("LAD", (CreateFn) new LAD());        \
-//}
 
 }  // gbdt
