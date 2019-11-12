@@ -48,13 +48,13 @@ class LossFactory {
   static Objective* create__ ## CLZ() { return new CLZ(); }
 #endif
 
-#ifndef DEFINE_OBJECTIVE_REGISTRATION
-#define DEFINE_OBJECTIVE_REGISTRATION(CLZ)                              \
-  DEFINE_OBJECTIVE_CREATOR(CLZ)                                         \
-  void register__ ## CLZ(void) {                                        \
-    LossFactory::GetInstance()->Register(#CLZ, create__ ## CLZ);        \
-  }
-#endif
+//#ifndef DEFINE_OBJECTIVE_REGISTRATION
+//#define DEFINE_OBJECTIVE_REGISTRATION(CLZ)                              \
+//  DEFINE_OBJECTIVE_CREATOR(CLZ)                                         \
+//  void register__ ## CLZ(void) {                                        \
+//    LossFactory::GetInstance()->Register(#CLZ, create__ ## CLZ);        \
+//  }
+//#endif
 
 #ifndef SHARED_LIB_INIT_DECLARE
 #define SHARED_LIB_INIT_DECLARE                 \

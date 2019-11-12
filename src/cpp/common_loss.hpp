@@ -125,7 +125,10 @@ class LogLoss: public Objective {
 };
 
 DECLARE_OBJECTIVE_REGISTRATION(LogLoss)
-
+//DEFINE_OBJECTIVE_CREATOR(LogLoss)
+//void register__LogLoss(void) {                                        \
+//  LossFactory::GetInstance()->Register("LogLoss", create__LogLoss);        \
+//}
 
 ///////////////////////////////////////////////////////////////////////
 // LAD
