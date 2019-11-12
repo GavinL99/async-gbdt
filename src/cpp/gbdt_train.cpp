@@ -51,15 +51,17 @@ int main(int argc, char *argv[]) {
   opt.Get("data_ratio", &conf.data_sample_ratio);
   opt.Get("debug", &conf.debug);
   opt.Get("min_leaf_size", &conf.min_leaf_size);
-  std::string loss_type = "SquaredError";
-//  opt.Get("loss", &loss_type);
+  std::string loss_type;
+  opt.Get("loss", &loss_type);
+//  std::string loss_type = "SquaredError";
+
   std::string custom_loss_so;
   opt.Get("custom_loss_so", &custom_loss_so);
   LossFactory::GetInstance()->LoadSharedLib(custom_loss_so);
 
-  std::cout << "Start registering\n" << std::endl;
-  using CreateFn = Objective* (*) ();
-  LossFactory::GetInstance()->Register("SquaredError", (CreateFn) new SquaredError());        \
+//  std::cout << "Start registering\n" << std::endl;
+//  using CreateFn = Objective* (*) ();
+//  LossFactory::GetInstance()->Register("SquaredError", (CreateFn) new SquaredError());        \
 
   Objective *objective = LossFactory::GetInstance()->Create(loss_type);
   if (!objective) {

@@ -1,7 +1,7 @@
 #include "common_loss.hpp"
 
 namespace gbdt {
-  using CreateFn = Objective* (*) ();
+//  using CreateFn = Objective* (*) ();
 
 //DEFINE_OBJECTIVE_REGISTRATION(SquaredError)
 //

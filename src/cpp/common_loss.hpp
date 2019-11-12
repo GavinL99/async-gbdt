@@ -124,7 +124,7 @@ class LogLoss: public Objective {
   }
 };
 
-//DECLARE_OBJECTIVE_REGISTRATION(LogLoss)
+DECLARE_OBJECTIVE_REGISTRATION(LogLoss)
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ class LAD: public Objective {
   }
 };
 
-//DECLARE_OBJECTIVE_REGISTRATION(LAD)
+DECLARE_OBJECTIVE_REGISTRATION(LAD)
 
 }  // gbdt
 
