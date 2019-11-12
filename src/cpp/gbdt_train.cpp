@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
   opt.Get("custom_loss_so", &custom_loss_so);
   LossFactory::GetInstance()->LoadSharedLib(custom_loss_so);
 
+  std::cout << "Start registering\n" << std::endl;
   using CreateFn = Objective* (*) ();
   LossFactory::GetInstance()->Register("SquaredError", (CreateFn) new SquaredError());        \
 
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]) {
     LossFactory::GetInstance()->PrintAllCandidates();
     return -1;
   }
-
+  std::cout << "Objective registered!\n" << std::endl;
   conf.loss.reset(objective);
 
   std::cout << conf.ToString() << std::endl;
