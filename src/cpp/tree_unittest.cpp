@@ -14,7 +14,7 @@ using namespace gbdt;
 
 int main(int argc, char *argv[]) {
 #ifdef USE_OPENMP
-  const int threads_wanted = 4;
+  const int threads_wanted = 1;
   omp_set_num_threads(threads_wanted);
 #endif
 

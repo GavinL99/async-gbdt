@@ -19,7 +19,7 @@ Objective* create__SquaredError() { return new SquaredError(); }
 
 int main(int argc, char *argv[]) {
   CmdOption opt;
-  opt.AddOption("threads", "t", "threads", 4);
+  opt.AddOption("threads", "t", "threads", 1);
   opt.AddOption("feature_size", "f", "feature_size", OptionType::INT, true);
   opt.AddOption("max_depth", "d", "max_depth", 4);
   opt.AddOption("iterations", "n", "iterations", 10);
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   }
 
 #ifdef USE_OPENMP
-  int threads_wanted;
+  int threads_wanted = 16;
   opt.Get("num_of_threads", &threads_wanted);
   omp_set_num_threads(threads_wanted);
 #endif
