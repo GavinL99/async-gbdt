@@ -1,9 +1,0 @@
-data/
-src/java
-GTAGS
-GRTAGS
-GPATH
-GSYMS
-src/cpp/*.o
-src/cpp/*.so
-src/cpp/*.a

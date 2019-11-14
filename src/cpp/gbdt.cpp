@@ -149,6 +149,7 @@ void GBDT::UpdateGradient(DataVector *d, size_t samples, int i) {
 #endif
   for (size_t j = 0; j < samples; ++j) {
     ValueType p = Predict(*(d->at(j)), i);
+//    ???? no sync???
     conf.loss->UpdateGradient(d->at(j), p);
   }
 }

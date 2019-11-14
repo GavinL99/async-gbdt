@@ -39,6 +39,7 @@ void RegressionTree::Fit(DataVector *data,
   }
 
   double g = 0.0;
+  // shuffle and sample features, compute impurity for each feature and split
   if (!FindSplit(data, len, &(node->index), &(node->value), &g)) {
     node->leaf = true;
     return;
@@ -258,6 +259,7 @@ bool RegressionTree::FindSplit(DataVector *data, size_t m,
   return best_fitness != std::numeric_limits<double>::max();
 }
 
+// use reduction of variance
 bool RegressionTree::GetImpurity(DataVector *data, size_t len,
                                  int index, ValueType *value,
                                  double *impurity, double *gain) {
