@@ -51,12 +51,12 @@ if __name__ == '__main__':
     start_ts = time.time()
     est.fit(x,y)
     end_ts = time.time()
-    print "time to fit: ", (end_ts - start_ts)
+    print("time to fit: ", (end_ts - start_ts))
 
     y1est = est.predict(x1)
     if args.loss == 'ls':
-        print math.sqrt(mean_squared_error(y1, y1est))
+        print (math.sqrt(mean_squared_error(y1, y1est)))
     elif args.loss == 'lad':
-        print mean_absolute_error(y1, y1est)
+        print (mean_absolute_error(y1, y1est))
     elif args.loss == 'logloss':
-        print roc_auc_score(y1, y1est)
+        print (roc_auc_score(y1, y1est))
