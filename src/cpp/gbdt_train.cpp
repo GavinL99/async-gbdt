@@ -89,6 +89,23 @@ int main(int argc, char *argv[]) {
   GBDT gbdt(conf);
 
   Elapsed elapsed;
+  //Set parallelism for Fork/Join in gbdt
+  //shuffle dataVector
+  std::random_shuffle(d->begin(), d->end());
+  size_t dsize = d->size();
+  int subSize = dsize/threads_wanted;
+  //create a omp parallel setting
+  for(int i = 0; i<threads_wanted; i++)
+  {
+    //create a subvector for each parallel task
+    DataVector::iterator first = d->begin() + (i*subSize);
+    if(i < threads_wanted - 1)
+      DataVector::iterator end = d->begin() + ((i+1)*subSize);
+    else
+      DataVector::const_iterator end = d->end();
+    DataVector taskVector(first,end);
+    //Call gbdt.Fit or something equivalent on the subVector
+  }
   gbdt.Fit(&d);
   std::cout << "training time: " << elapsed.Tell().ToMilliseconds() << " milliseconds" << std::endl;
   CleanDataVector(&d);
