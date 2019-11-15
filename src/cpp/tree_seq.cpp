@@ -237,9 +237,6 @@ namespace gbdt {
     double *impurity = new double[fn];
     double *g = new double[fn];
 
-#ifdef USE_OPENMP
-#pragma omp parallel for
-#endif
     for (size_t k = 0; k < fn; ++k) {
       GetImpurity(data, m, fv[k], &v[k], &impurity[k], &g[k]);
     }

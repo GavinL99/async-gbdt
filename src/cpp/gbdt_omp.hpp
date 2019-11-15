@@ -48,6 +48,7 @@ namespace gbdt {
     }
 
   private:
+    // this will be shared memory
     RegressionTree **trees;
     ValueType bias;
     ValueType shrinkage;
