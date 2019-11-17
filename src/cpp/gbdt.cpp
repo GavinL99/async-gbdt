@@ -28,8 +28,8 @@ namespace gbdt {
     // this computes the weighted mean as init guess
     bias = conf.loss->GetBias(d, len);
 
-    trees = new RegressionTree *[conf.iterations];
-    for (int i = 0; i < conf.iterations; ++i) {
+    trees = new RegressionTree *[conf.iterations * NUM_INDEP_TREES];
+    for (int i = 0; i < conf.iterations * NUM_INDEP_TREES; ++i) {
       trees[i] = new RegressionTree(conf);
     }
   }
