@@ -59,16 +59,14 @@ namespace gbdt {
     }
 
     bias = conf.loss->GetBias(d, len);
-
-    trees = new RegressionTree*[conf.iterations];
-    for (int i = 0; i < conf.iterations; ++i) {
-      trees[i] = new RegressionTree(conf);
-    }
-
   }
 
   void GBDT::Fit(DataVector *d) {
     ReleaseTrees();
+    trees = new RegressionTree*[conf.iterations];
+    for (int i = 0; i < conf.iterations; ++i) {
+      trees[i] = new RegressionTree(conf);
+    }
 
     size_t samples = d->size();
     if (conf.data_sample_ratio < 1) {

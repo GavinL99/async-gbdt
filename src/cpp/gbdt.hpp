@@ -1,7 +1,7 @@
 // Author: qiyiping@gmail.com (Yiping Qi)
 #ifndef _GBDT_H_
 #define _GBDT_H_
-#include "tree.hpp"
+#include "tree_seq.hpp"
 
 namespace gbdt {
 class GBDT {
