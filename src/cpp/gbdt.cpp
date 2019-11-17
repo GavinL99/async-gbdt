@@ -18,7 +18,24 @@
 #define TREE_SAMPLE_THRESHOLD 0.3
 
 namespace gbdt {
+
+  void GBDT::Init(DataVector &d, size_t len) {
+    assert(d.size() >= len);
+
+    if (conf.enable_initial_guess) {
+      return;
+    }
+    // this computes the weighted mean as init guess
+    bias = conf.loss->GetBias(d, len);
+
+    trees = new RegressionTree *[conf.iterations];
+    for (int i = 0; i < conf.iterations; ++i) {
+      trees[i] = new RegressionTree(conf);
+    }
+  }
+
   ValueType GBDT::Predict(const Tuple &t, size_t n) const {
+    // n is idx of iteration
     if (!trees)
       return kUnknownValue;
 
@@ -28,7 +45,7 @@ namespace gbdt {
     if (conf.enable_initial_guess) {
       r = t.initial_guess;
     }
-
+    // this is inefficient!
     for (size_t i = 0; i < n; ++i) {
       r += shrinkage * trees[i]->Predict(t);
     }
@@ -54,20 +71,26 @@ namespace gbdt {
     return r;
   }
 
-  void GBDT::Init(DataVector &d, size_t len) {
-    assert(d.size() >= len);
+  ValueType GBDT::Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const {
+    // n is idx of iteration, only update this iteration
+    if (!trees)
+      return kUnknownValue;
+    assert(n <= iterations);
 
-    if (conf.enable_initial_guess) {
-      return;
+    if (n == 0) {
+      if (conf.enable_initial_guess) {
+        r = t.initial_guess;
+      } else {
+        r = bias;
+      }
+      return r;
     }
 
-    bias = conf.loss->GetBias(d, len);
-
-    trees = new RegressionTree *[conf.iterations];
-    for (int i = 0; i < conf.iterations; ++i) {
-      trees[i] = new RegressionTree(conf);
+    for (size_t i = n * NUM_INDEP_TREES; i < (n+1) * NUM_INDEP_TREES; ++i) {
+      temp_pred += shrinkage / NUM_INDEP_TREES * trees[i]->Predict(t);
     }
 
+    return temp_pred;
   }
 
   void GBDT::Fit(DataVector *d) {
@@ -75,32 +98,41 @@ namespace gbdt {
     size_t dsize = d->size();
     Init(*d, dsize * NUM_INDEP_TREES);
     size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
+    // store temp value of pred for all data points
+    ValueType temp_pred[dsize] = {0.0};
     // presort only once
     std::random_shuffle(d->begin(), d->end());
 
     for (size_t i = 0; i < conf.iterations; ++i) {
       Elapsed elapsed;
 
-#pragma omp parallel for default(none) shared(trees, d, samples, i) schdule(static)
+      // fork step
+#pragma omp parallel for default(none) shared(trees, d, samples, i) schdule(dynamic)
       for (int j = 0; j < NUM_INDEP_TREES; ++j) {
         // take a random sample
-        std::vector<int> sample;
-        std::sample(population.begin(), population.end(),
+        std::vector<Tuple> sample;
+        // needs c++ 17
+        std::sample(d.begin(), d.end(),
                     std::back_inserter(sample),
                     sample_sz, std::mt19937{std::random_device{}()});
         RegressionTree* iter_tree = trees[i * NUM_INDEP_TREES + j];
+        // fit a new tree based on updated target of tuples
         iter_tree->Fit(sample, sample_sz);
       }
 
-      UpdateGradient(d, samples, i);
-      trees[i]->Fit(d, samples);
+      // join step: update gradients for ALL data points
+#pragma omp parallel for default(none) shared(trees, weights, d, samples, i, conf, temp_pred) schdule(dynamic)
+      for (int j = 0; j < dsize; ++j) {
+        temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
+        conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
+      }
+
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
         std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
                   << ", loss: " << GetLoss(d, samples, i) << std::endl;
       }
     }
-
 
     // Calculate gain
     delete[] gain;
@@ -110,7 +142,7 @@ namespace gbdt {
       gain[i] = 0.0;
     }
 
-    for (size_t j = 0; j < iterations; ++j) {
+    for (size_t j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
       double *g = trees[j]->GetGain();
       for (size_t i = 0; i < conf.number_of_feature; ++i) {
         gain[i] += g[i];
@@ -152,12 +184,10 @@ namespace gbdt {
   GBDT::~GBDT() {
     ReleaseTrees();
     delete[] gain;
+    delete[] weights;
   }
 
   void GBDT::UpdateGradient(DataVector *d, size_t samples, int i) {
-#ifdef USE_OPENMP
-#pragma omp parallel for
-#endif
     for (size_t j = 0; j < samples; ++j) {
       ValueType p = Predict(*(d->at(j)), i);
 //    ???? no sync???

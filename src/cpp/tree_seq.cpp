@@ -1,6 +1,6 @@
 // Author: qiyiping@gmail.com (Yiping Qi)
 
-#include "tree.hpp"
+#include "tree_seq.hpp"
 #include "math_util.hpp"
 #include "util.hpp"
 #include "loss.hpp"
@@ -22,6 +22,19 @@ namespace {
 
 
 namespace gbdt {
+  // a wrapper function to hide internals for OMP
+  void RegressionTree::Fit(DataVector *data, size_t len) {
+    assert(data->size() >= len);
+    delete root;
+    root = new Node();
+    delete[] gain;
+    gain = new double[conf.number_of_feature];
+    for (size_t i = 0; i < conf.number_of_feature; ++i) {
+      gain[i] = 0.0;
+    }
+    Fit(data, len, root, 0, gain);
+  }
+
   void RegressionTree::Fit(DataVector *data,
                            size_t len,
                            Node *node,
@@ -110,18 +123,6 @@ namespace gbdt {
       p[root->index] += (root->child[Node::GE]->pred - root->pred);
       return Predict(root->child[Node::GE], t, p);
     }
-  }
-
-  void RegressionTree::Fit(DataVector *data, size_t len) {
-    assert(data->size() >= len);
-    delete root;
-    root = new Node();
-    delete[] gain;
-    gain = new double[conf.number_of_feature];
-    for (size_t i = 0; i < conf.number_of_feature; ++i) {
-      gain[i] = 0.0;
-    }
-    Fit(data, len, root, 0, gain);
   }
 
   ValueType RegressionTree::Predict(const Tuple &t) const {

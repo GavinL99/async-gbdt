@@ -23,6 +23,9 @@ class GBDT {
     return Predict(t, iterations, p);
   }
 
+  ValueType GBDT::Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
+
+
   std::string Save() const;
   void Load(const std::string &s);
 
@@ -49,6 +52,8 @@ class GBDT {
 
  private:
   RegressionTree **trees;
+//  // for trees
+//  double *weights;
   ValueType bias;
   ValueType shrinkage;
   size_t iterations;

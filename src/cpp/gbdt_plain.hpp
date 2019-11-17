@@ -4,9 +4,9 @@
 #include "tree.hpp"
 
 namespace gbdt {
-  class GBDT {
+  class GBDT_PLAIN {
   public:
-    GBDT(Configure conf): trees(NULL),
+    GBDT_PLAIN(Configure conf): trees(NULL),
                           bias(0),
                           conf(conf),
                           gain(NULL) {
@@ -28,7 +28,7 @@ namespace gbdt {
 
     double *GetGain() { return gain; }
 
-    ~GBDT();
+    ~GBDT_PLAIN();
   private:
     ValueType Predict(const Tuple &t, size_t n) const;
     ValueType Predict(const Tuple &t, size_t n, double *p) const;
@@ -58,7 +58,7 @@ namespace gbdt {
 
     double *gain;
 
-    DISALLOW_COPY_AND_ASSIGN(GBDT);
+    DISALLOW_COPY_AND_ASSIGN(GBDT_PLAIN);
   };
 }
 

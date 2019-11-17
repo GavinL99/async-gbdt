@@ -1,5 +1,5 @@
 // Author: qiyiping@gmail.com (Yiping Qi)
-#include "gbdt.hpp"
+#include "gbdt_plain.hpp"
 #include "math_util.hpp"
 #include "util.hpp"
 #include "auc.hpp"
@@ -15,7 +15,7 @@
 #endif
 
 namespace gbdt {
-  ValueType GBDT::Predict(const Tuple &t, size_t n) const {
+  ValueType GBDT_PLAIN::Predict(const Tuple &t, size_t n) const {
     if (!trees)
       return kUnknownValue;
 
@@ -33,7 +33,7 @@ namespace gbdt {
     return r;
   }
 
-  ValueType GBDT::Predict(const Tuple &t, size_t n, double *p) const {
+  ValueType GBDT_PLAIN::Predict(const Tuple &t, size_t n, double *p) const {
     if (!trees)
       return kUnknownValue;
 
@@ -51,7 +51,7 @@ namespace gbdt {
     return r;
   }
 
-  void GBDT::Init(DataVector &d, size_t len) {
+  void GBDT_PLAIN::Init(DataVector &d, size_t len) {
     assert(d.size() >= len);
 
     if (conf.enable_initial_guess) {
@@ -61,7 +61,7 @@ namespace gbdt {
     bias = conf.loss->GetBias(d, len);
   }
 
-  void GBDT::Fit(DataVector *d) {
+  void GBDT_PLAIN::Fit(DataVector *d) {
     ReleaseTrees();
     trees = new RegressionTree*[conf.iterations];
     for (int i = 0; i < conf.iterations; ++i) {
@@ -107,7 +107,7 @@ namespace gbdt {
     }
   }
 
-  std::string GBDT::Save() const {
+  std::string GBDT_PLAIN::Save() const {
     std::vector<std::string> vs;
     vs.push_back(std::to_string(shrinkage));
     vs.push_back(std::to_string(bias));
@@ -117,7 +117,7 @@ namespace gbdt {
     return JoinString(vs, "\n;\n");
   }
 
-  void GBDT::Load(const std::string &s) {
+  void GBDT_PLAIN::Load(const std::string &s) {
     delete[] trees;
     std::vector<std::string> vs;
     SplitString(s, "\n;\n", &vs);
@@ -138,12 +138,12 @@ namespace gbdt {
     }
   }
 
-  GBDT::~GBDT() {
+  GBDT_PLAIN::~GBDT() {
     ReleaseTrees();
     delete[] gain;
   }
 
-  void GBDT::UpdateGradient(DataVector *d, size_t samples, int i) {
+  void GBDT_PLAIN::UpdateGradient(DataVector *d, size_t samples, int i) {
 #ifdef USE_OPENMP
 #pragma omp parallel for
 #endif
@@ -154,7 +154,7 @@ namespace gbdt {
     }
   }
 
-  double GBDT::GetLoss(DataVector *d, size_t samples, int i) {
+  double GBDT_PLAIN::GetLoss(DataVector *d, size_t samples, int i) {
     double s = 0.0;
 #ifdef USE_OPENMP
 #pragma omp parallel for reduction(+:s)
