@@ -100,13 +100,10 @@ namespace gbdt {
     size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
     // store temp value of pred for all data points
     ValueType temp_pred[dsize] = {0.0};
-    // presort only once
-    std::random_shuffle(d->begin(), d->end());
 
     for (size_t i = 0; i < conf.iterations; ++i) {
       Elapsed elapsed;
-
-      // fork step
+      // fork step: build trees independently
 #pragma omp parallel for default(none) shared(trees, d, samples, i) schdule(dynamic)
       for (int j = 0; j < NUM_INDEP_TREES; ++j) {
         // take a random sample
