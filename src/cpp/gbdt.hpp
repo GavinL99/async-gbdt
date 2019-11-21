@@ -24,7 +24,7 @@ class GBDT {
   ~GBDT();
  private:
   void Init(DataVector &d);
-  double GetLoss(DataVector *d, size_t samples, int i);
+  double GetLoss(DataVector *d, size_t samples, int i, ValueType* temp_pred);
 
   ValueType Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
 
