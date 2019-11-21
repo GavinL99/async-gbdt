@@ -33,7 +33,7 @@ namespace gbdt {
   }
 
   // for out-of-sample prediction
-  ValueType GBDT_PLAIN::Predict(const Tuple &t) const {
+  ValueType GBDT::Predict(const Tuple &t) const {
     if (!trees)
       return kUnknownValue;
 
