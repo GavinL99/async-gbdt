@@ -99,10 +99,11 @@ namespace gbdt {
       std::cout << "Finish updating gradient for: " << i << "\n" << std::endl;
 
       // build trees independently
-#pragma omp parallel for default(none) shared(trees, d, sample_sz, i) schedule(dynamic)
+#pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
       for (int j = 0; j < NUM_INDEP_TREES; ++j) {
         // take a random sample
         DataVector sample;
+        sample.reserve(dsize);
         // needs c++ 17
         std::sample(d->begin(), d->end(),
                     std::back_inserter(sample),
@@ -110,6 +111,7 @@ namespace gbdt {
         RegressionTree* iter_tree = trees[i * NUM_INDEP_TREES + j];
         // fit a new tree based on updated target of tuples
         iter_tree->Fit(&sample, sample_sz);
+        std::cout << "Finish fitting Tree: " << j << "\n" << std::endl;
       }
       std::cout << "Finish fitting for: " << i << "\n" << std::endl;
 
