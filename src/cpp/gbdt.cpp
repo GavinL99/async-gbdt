@@ -70,7 +70,7 @@ namespace gbdt {
       Elapsed elapsed;
       // update gradients for ALL data points
       // update cumulative pred and target field in tuples
-#pragma omp parallel for default(none) shared(trees, d, i, conf, temp_pred) schedule(dynamic)
+#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred) schedule(dynamic)
       for (int j = 0; j < dsize; ++j) {
         if (i > 0) {
           temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
