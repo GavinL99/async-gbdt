@@ -15,9 +15,6 @@ class GBDT {
   }
 
   void Fit(DataVector *d);
-  ValueType Predict(const Tuple &t) const {
-    return Predict(t, iterations);
-  }
 
   std::string Save() const;
   void Load(const std::string &s);
@@ -26,12 +23,12 @@ class GBDT {
 
   ~GBDT();
  private:
-  void Init(DataVector &d, size_t len);
+  void Init(DataVector &d);
 
   void UpdateGradient(DataVector *d, size_t samples, int iteration);
   double GetLoss(DataVector *d, size_t samples, int i);
 
-  ValueType GBDT::Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
+  ValueType Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
 
   void ReleaseTrees() {
     if (trees) {
