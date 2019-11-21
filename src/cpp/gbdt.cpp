@@ -50,7 +50,7 @@ namespace gbdt {
   }
 
   /**
-   * Prediction for one iteration
+   * Prediction from prev iteration
    * @param t
    * @param n: idx of iteration, only update this iteration
    * @param temp_pred: cumulatively updated result for each data point
@@ -68,7 +68,7 @@ namespace gbdt {
       return bias;
     }
 
-    for (size_t i = n * NUM_INDEP_TREES; i < (n+1) * NUM_INDEP_TREES; ++i) {
+    for (size_t i = (n-1) * NUM_INDEP_TREES; i < n * NUM_INDEP_TREES; ++i) {
       temp_pred += shrinkage / NUM_INDEP_TREES * trees[i]->Predict(t);
     }
 
