@@ -28,6 +28,9 @@ class GBDT {
 
   ValueType Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
 
+  ValueType Predict(const Tuple &t) const;
+
+
   void ReleaseTrees() {
     if (trees) {
       for (int i = 0; i < iterations; ++i) {

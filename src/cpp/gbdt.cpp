@@ -32,6 +32,23 @@ namespace gbdt {
     }
   }
 
+  // for out-of-sample prediction
+  ValueType GBDT_PLAIN::Predict(const Tuple &t) const {
+    if (!trees)
+      return kUnknownValue;
+
+    ValueType r = bias;
+    if (conf.enable_initial_guess) {
+      r = t.initial_guess;
+    }
+
+    for (size_t i = 0; i < iterations * NUM_INDEP_TREES; ++i) {
+      r += shrinkage * trees[i]->Predict(t) / NUM_INDEP_TREES;
+    }
+
+    return r;
+  }
+
   /**
    * Prediction for one iteration
    * @param t
