@@ -111,7 +111,6 @@ namespace gbdt {
         RegressionTree* iter_tree = trees[i * NUM_INDEP_TREES + j];
         // fit a new tree based on updated target of tuples
         iter_tree->Fit(&sample, sample_sz);
-        std::cout << "Finish fitting Tree: " << j << "\n" << std::endl;
       }
       std::cout << "Finish fitting for: " << i << "\n" << std::endl;
 
