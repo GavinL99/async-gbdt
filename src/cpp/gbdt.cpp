@@ -95,7 +95,7 @@ namespace gbdt {
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
         std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
-                  << ", loss: " << GetLoss(d, samples, i) << std::endl;
+                  << ", loss: " << GetLoss(d, d.size(), i) << std::endl;
       }
     }
 
@@ -149,17 +149,8 @@ namespace gbdt {
   GBDT::~GBDT() {
     ReleaseTrees();
     delete[] gain;
-    delete[] weights;
   }
-
-  void GBDT::UpdateGradient(DataVector *d, size_t samples, int i) {
-    for (size_t j = 0; j < samples; ++j) {
-      ValueType p = Predict(*(d->at(j)), i);
-//    ???? no sync???
-      conf.loss->UpdateGradient(d->at(j), p);
-    }
-  }
-
+  
   double GBDT::GetLoss(DataVector *d, size_t samples, int i) {
     double s = 0.0;
 #ifdef USE_OPENMP
