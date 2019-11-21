@@ -9,6 +9,7 @@
 #include <cassert>
 #include <algorithm>
 #include "time.hpp"
+#include <random>
 
 #ifdef USE_OPENMP
 #include <parallel/algorithm>  // openmp
@@ -81,14 +82,14 @@ namespace gbdt {
 #pragma omp parallel for default(none) shared(trees, d, sample_sz, i) schedule(dynamic)
       for (int j = 0; j < NUM_INDEP_TREES; ++j) {
         // take a random sample
-        std::vector<Tuple> sample;
+        DataVector sample;
         // needs c++ 17
-        std::sample(d.begin(), d.end(),
+        std::sample(d->begin(), d->end(),
                     std::back_inserter(sample),
                     sample_sz, std::mt19937{std::random_device{}()});
         RegressionTree* iter_tree = trees[i * NUM_INDEP_TREES + j];
         // fit a new tree based on updated target of tuples
-        iter_tree->Fit(sample, sample_sz);
+        iter_tree->Fit(&sample, sample_sz);
       }
 
       long fitting_time = elapsed.Tell().ToMilliseconds();
