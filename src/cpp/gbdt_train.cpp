@@ -61,24 +61,19 @@ int main(int argc, char *argv[]) {
   opt.Get("custom_loss_so", &custom_loss_so);
   LossFactory::GetInstance()->LoadSharedLib(custom_loss_so);
 
-  std::cout << "Start registering\n" << std::endl;
+  std::cout << "Start registering objective function\n" << std::endl;
   using CreateFn = Objective* (*) ();
   LossFactory::GetInstance()->Register("SquaredError", create__SquaredError);        \
-  std::cout << "Getting...\n" << std::endl;
   Objective *objective = LossFactory::GetInstance()->Create(loss_type);
-  std::cout << "Checking...\n" << std::endl;
   if (!objective) {
     LossFactory::GetInstance()->PrintAllCandidates();
     return -1;
   }
-  std::cout << "Objective registered!\n" << std::endl;
+  std::cout << "Objective function registered!\n" << std::endl;
   conf.loss.reset(objective);
-
-  std::cout << conf.ToString() << std::endl;
 
   std::string train_file;
   opt.Get("train_file", &train_file);
-
   DataVector d;
   bool r = LoadDataFromFile(train_file,
                             &d,

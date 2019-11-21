@@ -35,6 +35,7 @@ namespace gbdt {
     Fit(data, len, root, 0, gain);
   }
 
+
   void RegressionTree::Fit(DataVector *data,
                            size_t len,
                            Node *node,

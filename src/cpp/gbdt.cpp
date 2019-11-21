@@ -19,60 +19,26 @@
 
 namespace gbdt {
 
-  void GBDT::Init(DataVector &d, size_t len) {
-    assert(d.size() >= len);
-
+  void GBDT::Init(DataVector &d) {
     if (conf.enable_initial_guess) {
       return;
     }
     // this computes the weighted mean as init guess
-    bias = conf.loss->GetBias(d, len);
-
+    bias = conf.loss->GetBias(d, d.size());
     trees = new RegressionTree *[conf.iterations * NUM_INDEP_TREES];
     for (int i = 0; i < conf.iterations * NUM_INDEP_TREES; ++i) {
       trees[i] = new RegressionTree(conf);
     }
   }
 
-  ValueType GBDT::Predict(const Tuple &t, size_t n) const {
-    // n is idx of iteration
-    if (!trees)
-      return kUnknownValue;
-
-    assert(n <= iterations);
-
-    ValueType r = bias;
-    if (conf.enable_initial_guess) {
-      r = t.initial_guess;
-    }
-    // this is inefficient!
-    for (size_t i = 0; i < n; ++i) {
-      r += shrinkage * trees[i]->Predict(t);
-    }
-
-    return r;
-  }
-
-  ValueType GBDT::Predict(const Tuple &t, size_t n, double *p) const {
-    if (!trees)
-      return kUnknownValue;
-
-    assert(n <= iterations);
-
-    ValueType r = bias;
-    if (conf.enable_initial_guess) {
-      r = t.initial_guess;
-    }
-
-    for (size_t i = 0; i < n; ++i) {
-      r += shrinkage * trees[i]->Predict(t, p);
-    }
-
-    return r;
-  }
-
+  /**
+   * Prediction for one iteration
+   * @param t
+   * @param n: idx of iteration, only update this iteration
+   * @param temp_pred: cumulatively updated result for each data point
+   * @return
+   */
   ValueType GBDT::Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const {
-    // n is idx of iteration, only update this iteration
     if (!trees)
       return kUnknownValue;
     assert(n <= iterations);
@@ -96,14 +62,24 @@ namespace gbdt {
   void GBDT::Fit(DataVector *d) {
     ReleaseTrees();
     size_t dsize = d->size();
-    Init(*d, dsize * NUM_INDEP_TREES);
+    Init(*d);
     size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
     // store temp value of pred for all data points
-    ValueType temp_pred[dsize] = {0.0};
+    ValueType temp_pred[dsize] = {bias};
 
     for (size_t i = 0; i < conf.iterations; ++i) {
       Elapsed elapsed;
-      // fork step: build trees independently
+      // update gradients for ALL data points
+      // update cumulative pred and target field in tuples
+#pragma omp parallel for default(none) shared(trees, weights, d, samples, i, conf, temp_pred) schdule(dynamic)
+      for (int j = 0; j < dsize; ++j) {
+        if (i > 0) {
+          temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
+        }
+        conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
+      }
+
+      // build trees independently
 #pragma omp parallel for default(none) shared(trees, d, samples, i) schdule(dynamic)
       for (int j = 0; j < NUM_INDEP_TREES; ++j) {
         // take a random sample
@@ -115,13 +91,6 @@ namespace gbdt {
         RegressionTree* iter_tree = trees[i * NUM_INDEP_TREES + j];
         // fit a new tree based on updated target of tuples
         iter_tree->Fit(sample, sample_sz);
-      }
-
-      // join step: update gradients for ALL data points
-#pragma omp parallel for default(none) shared(trees, weights, d, samples, i, conf, temp_pred) schdule(dynamic)
-      for (int j = 0; j < dsize; ++j) {
-        temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
-        conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
       }
 
       long fitting_time = elapsed.Tell().ToMilliseconds();
