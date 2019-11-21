@@ -7,7 +7,7 @@ execs = gbdt_predict gbdt_train
 CXX = g++
 # CXXFLAGS = -Wall -Wextra -Wconversion -pedantic -fopenmp -O2 -std=c++11 -fPIC
 # CXXFLAGS =  -Wextra -Wconversion -pedantic -fopenmp -O2 -DUSE_OPENMP -std=c++11 -fPIC
-CXXFLAGS = -Wall -fopenmp -DUSE_OPENMP -std=c++11 -g -O0 -fPIC
+CXXFLAGS = -Wall -fopenmp -DUSE_OPENMP -std=c++17 -g -O0 -fPIC
 
 all: libgbdt.a $(tests) $(execs) libcustom_loss_example.so
 
