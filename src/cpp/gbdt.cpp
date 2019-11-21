@@ -45,11 +45,9 @@ namespace gbdt {
 
     if (n == 0) {
       if (conf.enable_initial_guess) {
-        r = t.initial_guess;
-      } else {
-        r = bias;
+        return t.initial_guess;
       }
-      return r;
+      return bias;
     }
 
     for (size_t i = n * NUM_INDEP_TREES; i < (n+1) * NUM_INDEP_TREES; ++i) {
@@ -71,7 +69,7 @@ namespace gbdt {
       Elapsed elapsed;
       // update gradients for ALL data points
       // update cumulative pred and target field in tuples
-#pragma omp parallel for default(none) shared(trees, weights, d, samples, i, conf, temp_pred) schdule(dynamic)
+#pragma omp parallel for default(none) shared(trees, d, i, conf, temp_pred) schedule(dynamic)
       for (int j = 0; j < dsize; ++j) {
         if (i > 0) {
           temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
@@ -80,7 +78,7 @@ namespace gbdt {
       }
 
       // build trees independently
-#pragma omp parallel for default(none) shared(trees, d, samples, i) schdule(dynamic)
+#pragma omp parallel for default(none) shared(trees, d, sample_sz, i) schedule(dynamic)
       for (int j = 0; j < NUM_INDEP_TREES; ++j) {
         // take a random sample
         std::vector<Tuple> sample;
