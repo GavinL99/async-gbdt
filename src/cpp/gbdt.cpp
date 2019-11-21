@@ -84,7 +84,6 @@ namespace gbdt {
     ValueType temp_pred[dsize] = {bias};
 
     for (size_t i = 0; i < conf.iterations; ++i) {
-      std::cout << "Start training: " << i << "\n" << std::endl;
       Elapsed elapsed;
       // update gradients for ALL data points
       // update cumulative pred and target field in tuples
@@ -95,8 +94,6 @@ namespace gbdt {
         }
         conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
       }
-
-      std::cout << "Finish updating gradient for: " << i << "\n" << std::endl;
 
       // build trees independently
 #pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
@@ -112,7 +109,6 @@ namespace gbdt {
         // fit a new tree based on updated target of tuples
         iter_tree->Fit(&sample, sample_sz);
       }
-      std::cout << "Finish fitting for: " << i << "\n" << std::endl;
 
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
