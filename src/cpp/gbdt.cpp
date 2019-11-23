@@ -53,7 +53,7 @@ namespace gbdt {
    * @param temp_pred: cumulatively updated result for each data point
    * @return
    */
-  ValueType GBDT::Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const {
+  ValueType GBDT::Predict_COMP(const Tuple &t, size_t n, ValueType temp_pred) const {
     if (!trees)
       return kUnknownValue;
     assert(n <= iterations);
@@ -93,7 +93,7 @@ namespace gbdt {
 
         for (int j = 0; j < dsize; ++j) {
           if (i > 0) {
-            temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
+            temp_pred[j] = Predict_COMP(*(d->at(j)), i, temp_pred[j]);
           }
         }
         //Send temp_pred to WT
@@ -109,7 +109,7 @@ namespace gbdt {
           MPI_Recv(treeSize,1,MPI_INT,wt,tag3,MPI_COMM_WORLD,&Stat);
           //Then the tree
           Byte TempTree[treeSize];
-          MPI_Recv(TempTree,treeSize,MPI Byte array,tag2,MPI_COMM_WORLD,&Stat);
+          MPI_Recv(TempTree,treeSize,MPI_BYTE,tag2,MPI_COMM_WORLD,&Stat);
         }
         //De-serialize the trees
       }
@@ -141,7 +141,7 @@ namespace gbdt {
         //send the updated tree size to MT
         MPI_Send(treeSize,1,MPI_INT,0,tag3,MPI_COMM_WORLD);
         //send the tree to MT
-        MPI_Send(Ser_Tree,treeSize,MPI Byte array,tag2,MPI_COMM_WORLD);
+        MPI_Send(Ser_Tree,treeSize,MPI_BYTE,tag2,MPI_COMM_WORLD);
       }
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
