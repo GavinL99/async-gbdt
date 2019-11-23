@@ -8,16 +8,14 @@
 #include "cmd_option.hpp"
 #include "loss.hpp"
 #include "common_loss.hpp"
-
-#ifdef USE_OPENMP
-#include <omp.h>
-#endif
+#include "mpi.h"
 
 using namespace gbdt;
 
 Objective* create__SquaredError() { return new SquaredError(); }
 
 int main(int argc, char *argv[]) {
+  MPI_Init(NULL, NULL);
   CmdOption opt;
   opt.AddOption("threads", "t", "threads", 1);
   opt.AddOption("feature_size", "f", "feature_size", OptionType::INT, true);
@@ -99,6 +97,7 @@ int main(int argc, char *argv[]) {
   for (size_t i = 0; i < conf.number_of_feature; ++i) {
     std::cout << i << "\t" << g[i] << std::endl;
   }
-
+  
+  MPI_Finalize();
   return 0;
 }

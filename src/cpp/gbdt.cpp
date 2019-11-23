@@ -10,10 +10,7 @@
 #include <algorithm>
 #include "time.hpp"
 #include <random>
-
-#ifdef USE_OPENMP
-#include <parallel/algorithm>  // openmp
-#endif
+#include "mpi.h"
 
 #define NUM_INDEP_TREES 8
 #define TREE_SAMPLE_THRESHOLD 0.3
@@ -82,39 +79,77 @@ namespace gbdt {
     size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
     // store temp value of pred for all data points
     ValueType temp_pred[dsize] = {bias};
-
+    //Initialize all MPI constants
+    int numtasks, rank, dest, source, rc, count, tag1 = 1, tag2 = 2, tag3 = 3;
+    MPI_Status Stat;
+    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+ 
     for (size_t i = 0; i < conf.iterations; ++i) {
       Elapsed elapsed;
-      // update gradients for ALL data points
-      // update cumulative pred and target field in tuples
-#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred) schedule(dynamic)
-      for (int j = 0; j < dsize; ++j) {
-        if (i > 0) {
-          temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
+      //If this is the master task
+      if(rank == 0)
+      {
+
+        for (int j = 0; j < dsize; ++j) {
+          if (i > 0) {
+            temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
+          }
         }
-        conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
+        //Send temp_pred to WT
+        for(int wt = 1; wt < numtasks; wt++)
+        {
+          MPI_Send(temp_pred, dsize, MPI_DOUBLE, wt, tag1, MPI_COMM_WORLD);
+        }
+        //Recieve trees from WT
+        for(int wt = 1; wt < numtasks; wt++)
+        {
+          //First recieve the tree size
+          int treeSize;
+          MPI_Recv(treeSize,1,MPI_INT,wt,tag3,MPI_COMM_WORLD,&Stat);
+          //Then the tree
+          Byte TempTree[treeSize];
+          MPI_Recv(TempTree,treeSize,MPI Byte array,tag2,MPI_COMM_WORLD,&Stat);
+        }
+        //De-serialize the trees
       }
+      //if this is a worker task
+      else
+      {
+        //Receive the temp_pred from MT
+        MPI_Recv(temp_pred, dsize, MPI_DOUBLE, 0, tag1, MPI_COMM_WORLD,&Stat);
+        //Update the Gradient for all data points
+        for(int j = 0; j < dsize; j++)
+        {
+          conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
+        }
+        //build the trees
+        for (int j = 0; j < NUM_INDEP_TREES; ++j) {
+          // take a random sample
+          DataVector sample;
+          sample.reserve(dsize);
+          // needs c++ 17
+          std::sample(d->begin(), d->end(),
+                      std::back_inserter(sample),
+                      sample_sz, std::mt19937{std::random_device{}()});
+          RegressionTree* iter_tree = trees[i * NUM_INDEP_TREES + j];
+          // fit a new tree based on updated target of tuples
+          iter_tree->Fit(&sample, sample_sz);
+        }
+        //serialize the tree
 
-      // build trees independently
-#pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
-      for (int j = 0; j < NUM_INDEP_TREES; ++j) {
-        // take a random sample
-        DataVector sample;
-        sample.reserve(dsize);
-        // needs c++ 17
-        std::sample(d->begin(), d->end(),
-                    std::back_inserter(sample),
-                    sample_sz, std::mt19937{std::random_device{}()});
-        RegressionTree* iter_tree = trees[i * NUM_INDEP_TREES + j];
-        // fit a new tree based on updated target of tuples
-        iter_tree->Fit(&sample, sample_sz);
+        //send the updated tree size to MT
+        MPI_Send(treeSize,1,MPI_INT,0,tag3,MPI_COMM_WORLD);
+        //send the tree to MT
+        MPI_Send(Ser_Tree,treeSize,MPI Byte array,tag2,MPI_COMM_WORLD);
       }
-
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
         std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
                   << ", loss: " << GetLoss(d, d->size(), i, temp_pred) << std::endl;
       }
+      //synchronize all tasks for this specific iteration
+      MPI_Barrier(MPI_COMM_WORLD);
     }
 
     // Calculate gain
