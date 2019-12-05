@@ -71,6 +71,43 @@ namespace gbdt {
 
     return temp_pred;
   }
+  void GBDT::ServerSide( std::queue<RegressionTree*>& taskQ,ValueType* pub_ptr,int dsize)
+  {
+    ValueType private_L[dsize];
+    ValueType tempL = *pub_ptr;
+    std::copy(std::begin(tempL), std::end(tempL), std::begin(private_L));
+    ValueType *priv_ptr;
+    priv_ptr = private_L;
+
+    while(true)
+    {
+      while (taskQ.empty())
+      {
+        //wait for a new tree to be made
+      }
+      //under lock
+      RegressionTree curr_tree = taskQ.pop();
+
+      trees.push_back(curr_tree);
+      //Compute the updated L
+      for (int j = 0; j < dsize; ++j) {
+        if (i > 0) {
+          *priv_ptr[j] = Predict_OMP(*(d->at(j)), i, *pub_ptr[j]);
+        }
+        conf.loss->UpdateGradient(d->at(j), *priv_ptr[j]);
+      }
+      //under lock
+      ValueType *temp_ptr = priv_ptr;
+      priv_ptr = pub_ptr;
+      pub_ptr = temp_ptr;
+    }
+
+  }
+
+  void GBDT::WorkerSide(std::queue<RegressionTree*>& taskQ,,ValueType* pub_ptr)
+  {
+
+  }
 
   void GBDT::Fit(DataVector *d, int threads_wanted) {
     ReleaseTrees();
@@ -85,7 +122,7 @@ namespace gbdt {
     ValueType *pub_ptr;
     pub_ptr = temp_pred;
     
-    std::thread server(ServerSide,&taskQ,pub_ptr);
+    std::thread server(ServerSide,&taskQ,pub_ptr,dsize);
     std::vector<std::thread> workers;
     for(int wt = 1; wt < threads_wanted; wt++)
     {
