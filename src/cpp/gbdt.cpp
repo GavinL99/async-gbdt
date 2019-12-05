@@ -84,7 +84,13 @@ namespace gbdt {
     //Create a pointer to the public L
     ValueType *pub_ptr;
     pub_ptr = temp_pred;
-
+    
+    std::thread server(ServerSide,&taskQ,pub_ptr);
+    std::vector<std::thread> workers;
+    for(int wt = 1; wt < threads_wanted; wt++)
+    {
+      workers.push_back(std::thread(WorkerSide, &taskQ, pub_ptr));
+    }
     for (size_t i = 0; i < conf.iterations; ++i) {
       Elapsed elapsed;
       // update gradients for ALL data points
