@@ -26,6 +26,7 @@ namespace gbdt {
 
   public:
     ReaderWriterLatch() = default;
+
     ~ReaderWriterLatch() {
       uniq_lock latch(mutex_);
     }
@@ -88,18 +89,18 @@ namespace gbdt {
   /*
    * The good thing about a list is we can maintain the forest in place!
    */
-  template <Typename T>
+  template<Typename T>
   class ConcurrentList {
   public:
-    ConcurrentQueue(): processed_(0) {}
+    ConcurrentQueue() : processed_(0) {}
 
     ~ConcurrentQueue() {
-      for (T* t: list_) {
+      for (T *t: list_) {
         delete t;
       }
     }
 
-    void push_and_notify(const uniq_p<T>& data) {
+    void push_and_notify(const uniq_p <T> &data) {
       uniq_lock latch(latch_);
       list_.push_back(std::move(data));
       if (list_.size() == processed_ + 1) {
@@ -108,7 +109,7 @@ namespace gbdt {
       }
     }
 
-    T* wait_and_consume() {
+    T *wait_and_consume() {
       uniq_lock latch(latch_);
       while (list_.size() == processed_) {
         cv_.wait(latch);
@@ -117,12 +118,11 @@ namespace gbdt {
     }
 
   private:
-    std::list<T*> list_;
+    std::list<T *> list_;
     mutex_t latch_;
     cond_t cv_;
     int processed_;
   };
-
 
 
 }  // namespace bustub
