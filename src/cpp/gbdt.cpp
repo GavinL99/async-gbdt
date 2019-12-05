@@ -11,9 +11,6 @@
 #include "time.hpp"
 #include <random>
 
-#ifdef USE_OPENMP
-#include <parallel/algorithm>  // openmp
-#endif
 
 #define NUM_INDEP_TREES 8
 #define TREE_SAMPLE_THRESHOLD 0.3
@@ -75,13 +72,18 @@ namespace gbdt {
     return temp_pred;
   }
 
-  void GBDT::Fit(DataVector *d) {
+  void GBDT::Fit(DataVector *d, int threads_wanted) {
     ReleaseTrees();
     size_t dsize = d->size();
     Init(*d);
     size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
     // store temp value of pred for all data points
     ValueType temp_pred[dsize] = {bias};
+    //Create a task queue
+    queue<RegressionTree> taskQ;
+    //Create a pointer to the public L
+    ValueType *pub_ptr;
+    pub_ptr = temp_pred;
 
     for (size_t i = 0; i < conf.iterations; ++i) {
       Elapsed elapsed;

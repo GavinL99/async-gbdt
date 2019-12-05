@@ -8,10 +8,8 @@
 #include "cmd_option.hpp"
 #include "loss.hpp"
 #include "common_loss.hpp"
+#include <queue> 
 
-#ifdef USE_OPENMP
-#include <omp.h>
-#endif
 
 using namespace gbdt;
 
@@ -37,11 +35,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-#ifdef USE_OPENMP
   int threads_wanted = 16;
   opt.Get("num_of_threads", &threads_wanted);
-  omp_set_num_threads(threads_wanted);
-#endif
   std::srand ( unsigned ( ::time(0) ) );
 
   Configure conf;
@@ -85,7 +80,7 @@ int main(int argc, char *argv[]) {
 
   Elapsed elapsed;
 
-  gbdt.Fit(&d);
+  gbdt.Fit(&d,threads_wanted);
   std::cout << "training time: " << elapsed.Tell().ToMilliseconds() << " milliseconds" << std::endl;
   CleanDataVector(&d);
   FreeVector(&d);
