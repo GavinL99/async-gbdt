@@ -110,10 +110,10 @@ namespace gbdt {
  * Update the private data_vec (L)
  * once finish, acquire write lock and swap pointers
  */
-void GBDT::ServerSide(int dsize, int num_iter, std::vector<ValueType>& temp_pred) {
+void GBDT::ServerSide(int dsize, int num_iter, std::vector<ValueType>& temp_pred,int threads_wanted) {
   int update_count = 0;
   assert(!server_finish);
-  while (update_count < num_iter) {
+  while (update_count < num_iter*threads_wanted) {
     Elapsed elapsed;
     RegressionTree *new_tree = trees_vec_.wait_and_consume();
     data_ptr_lock_.WLock();
@@ -128,6 +128,7 @@ void GBDT::ServerSide(int dsize, int num_iter, std::vector<ValueType>& temp_pred
       std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds\n"
                 << std::endl;
     }
+  }
   server_finish_ = true;
 }
 
@@ -158,11 +159,12 @@ void GBDT::Fit_Async(DataVector *d, int threads_wanted) {
   for (int wt = 0; wt < threads_wanted - 1; wt++) {
     workers.push_back(std::thread([=] { this->Workside(dsize) };));
   }
-  Serverside(dsize, conf.iterations, temp_pred);
+  Serverside(dsize, conf.iterations, temp_pred,threads_wanted);
   for (int wt = 0; wt < threads_wanted - 1; wt++) {
     workers[i].join();
   }
   data_ptr_ = nullptr;
+  server_finish_ = false;
 
   // Calculate gain
   std::cout << "Processed trees in total: " <<  tree_vec_.get_processed() << std::endl;
