@@ -151,6 +151,7 @@ void GBDT::Fit_Async(DataVector *d, int threads_wanted) {
     temp_pred[j] = Predict_OMP(*(d->at(j)), 0, temp_pred[j]);
     conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
   }
+  std::cout << "Start launching threads..\n" << std::endl;
   // launch threads
   std::vector <std::thread> workers;
   workers.reserve(threads_wanted - 1);
@@ -271,6 +272,9 @@ void GBDT::Load(const std::string &s) {
 
 GBDT::~GBDT() {
   ReleaseTrees();
+  for (RegressionTree *tree: trees_vec_) {
+    delete tree;
+  }
   delete[] gain;
 }
 

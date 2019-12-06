@@ -46,7 +46,7 @@ namespace gbdt {
      * Release a write latch.
      */
     void WUnlock() {
-      uniq_lock guard(mutex_);
+      uniq_lock latch(mutex_);
       writer_entered_ = false;
       reader_.notify_all();
     }
@@ -66,7 +66,7 @@ namespace gbdt {
      * Release a read latch.
      */
     void RUnlock() {
-      uniq_lock guard(mutex_);
+      uniq_lock latch(mutex_);
       reader_count_--;
       if (writer_entered_) {
         if (reader_count_ == 0) {
