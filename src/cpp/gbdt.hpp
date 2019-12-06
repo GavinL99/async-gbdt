@@ -2,6 +2,7 @@
 #ifndef _GBDT_H_
 #define _GBDT_H_
 #include "tree_seq.hpp"
+#include "concurrency.h"
 
 namespace gbdt {
 class GBDT {
@@ -14,7 +15,9 @@ class GBDT {
     iterations = conf.iterations;
   }
 
-  void Fit(DataVector *d);
+  void Fit_OMP(DataVector *d);
+
+  void Fit_Async(DataVector *d);
 
   std::string Save() const;
   void Load(const std::string &s);
@@ -30,6 +33,9 @@ class GBDT {
 
   ValueType Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
 
+  void WorkerSide();
+  void ServerSide(int);
+
 
 
   void ReleaseTrees() {
@@ -44,11 +50,16 @@ class GBDT {
 
  private:
   RegressionTree **trees;
-//  // for trees
-//  double *weights;
+  // for trees
   ValueType bias;
   ValueType shrinkage;
   size_t iterations;
+
+  // for async concurrency
+  std::vector<ValueType>& data_ptr_;
+  ReaderWriterLatch data_ptr_lock_;
+  ConcurrentVector<RegressionTree> trees_vec_;
+  bool server_finish_{false};
 
   Configure conf;
 

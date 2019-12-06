@@ -87,22 +87,23 @@ namespace gbdt {
 
 
   /*
-   * The good thing about a list is we can maintain the forest in place!
+   * The good thing about a vector is we can maintain the forest in place and don't need to change prediction
+   * function much
    */
   template<Typename T>
-  class ConcurrentList {
+  class ConcurrentVector {
   public:
-    ConcurrentQueue() : processed_(0) {}
+    ConcurrentVector() : processed_(0) {} = explicit ;
 
-    ~ConcurrentQueue() {
+    ~ConcurrentVector() {
       for (T *t: list_) {
         delete t;
       }
     }
 
-    void push_and_notify(const uniq_p <T> &data) {
+    void push_and_notify(T *data) {
       uniq_lock latch(latch_);
-      list_.push_back(std::move(data));
+      list_.push_back(data);
       if (list_.size() == processed_ + 1) {
         latch.unlock();
         cv_.notify_one();
@@ -118,7 +119,7 @@ namespace gbdt {
     }
 
   private:
-    std::list<T *> list_;
+    std::vector<T*> list_;
     mutex_t latch_;
     cond_t cv_;
     int processed_;

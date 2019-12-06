@@ -82,6 +82,7 @@ namespace gbdt {
     while (true) {
       while (taskQ.empty()) {
         //wait for a new tree to be made
+        break;
       }
       //under lock
       RegressionTree curr_tree = taskQ.pop();
@@ -98,34 +99,139 @@ namespace gbdt {
       ValueType *temp_ptr = priv_ptr;
       priv_ptr = pub_ptr;
       pub_ptr = temp_ptr;
+      break;
     }
 
   }
 
-  void GBDT::WorkerSide(std::queue<RegressionTree *> &taskQ,, ValueType
+  /*
+   * Generate a random sample of index first
+   * Take read lock and fit a new tree
+   * push it to the forest vector
+   */
+  void GBDT::WorkerSide() {
+    int dsize = data_ptr_->size();
+    int sample_sz = dsize * TREE_SAMPLE_THRESHOLD;
+    std::vector<int> sample_idx;
+    sample_idx.reserve(sample_sz);
+    DataVector sample;
+    sample.reserve(sample_sz);
 
-  * pub_ptr) {
+
+    while (!server_finish_) {
+      // random sample of index...
+
+      // get read lock to access data ptr
+      data_ptr_lock_.RLock();
+
+      // TODO: separate d and temp_pred so d is Read-only
+      for (int i = 0; i < sample_sz; ++i) {
+
+
+      }
+      RegressionTree *iter_tree = new RegressionTree(conf);
+      iter_tree->Fit(&sample, sample_sz);
+      trees_vec_.push_and_notify(iter_tree);
+    }
+
+  }
+}
+
+/*
+ * Pull a new tree if non-empty
+ * Update the private data_vec (L)
+ * once finish, acquire write lock and swap pointers
+ */
+void GBDT::ServerSide(int num_iter) {
 
 }
 
-void GBDT::Fit(DataVector *d, int threads_wanted) {
+
+/*
+ * Run the server routine inside the function call
+ * And launch a vector of work threads
+ * Join worker threads when the server finishes
+ * (e.g. update for certain amount of trees)
+ */
+void GBDT::Fit_Async(DataVector *d, int threads_wanted) {
+  ReleaseTrees();
+  size_t dsize = d->size();
+  bias = conf.loss->GetBias(d, dsize);
+  size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
+  // store temp value of pred for all data points
+  std::vector <ValueType> temp_pred(dsize, bias);
+  data_ptr_ = &temp_pred;
+
+  std::vector <std::thread> workers;
+  workers.reserve(threads_wanted - 1);
+  for (int wt = 0; wt < threads_wanted - 1; wt++) {
+    workers.push_back(std::thread([=] { this->Workside() };));
+  }
+  Serverside(conf.iterations);
+  for (int wt = 0; wt < threads_wanted - 1; wt++) {
+    workers[i].join();
+  }
+  data_ptr_ = nullptr;
+
+
+  for (size_t i = 0; i < conf.iterations; ++i) {
+    Elapsed elapsed;
+    // update gradients for ALL data points
+    // update cumulative pred and target field in tuples
+#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred) schedule(dynamic)
+    for (int j = 0; j < dsize; ++j) {
+      if (i > 0) {
+        temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
+      }
+      conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
+    }
+
+    // build trees independently
+#pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
+    for (int j = 0; j < NUM_INDEP_TREES; ++j) {
+      // take a random sample
+      DataVector sample;
+      sample.reserve(dsize);
+      // needs c++ 17
+      std::sample(d->begin(), d->end(),
+                  std::back_inserter(sample),
+                  sample_sz, std::mt19937{std::random_device{}()});
+      RegressionTree *iter_tree = trees[i * NUM_INDEP_TREES + j];
+      // fit a new tree based on updated target of tuples
+      iter_tree->Fit(&sample, sample_sz);
+    }
+
+    long fitting_time = elapsed.Tell().ToMilliseconds();
+    if (conf.debug) {
+      std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
+                << ", loss: " << GetLoss(d, d->size(), i, temp_pred) << std::endl;
+    }
+  }
+
+  // Calculate gain
+  delete[] gain;
+  gain = new double[conf.number_of_feature];
+
+  for (size_t i = 0; i < conf.number_of_feature; ++i) {
+    gain[i] = 0.0;
+  }
+
+  for (size_t j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
+    double *g = trees[j]->GetGain();
+    for (size_t i = 0; i < conf.number_of_feature; ++i) {
+      gain[i] += g[i];
+    }
+  }
+}
+
+void GBDT::Fit_OMP(DataVector *d, int threads_wanted) {
   ReleaseTrees();
   size_t dsize = d->size();
   Init(*d);
   size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
   // store temp value of pred for all data points
-  ValueType temp_pred[dsize] = {bias};
-  //Create a task queue
-  queue <RegressionTree> taskQ;
-  //Create a pointer to the public L
-  ValueType *pub_ptr;
-  pub_ptr = temp_pred;
+  std::vector <ValueType> temp_pred(dszie, bias);
 
-  std::thread server(ServerSide, &taskQ, pub_ptr, dsize);
-  std::vector <std::thread> workers;
-  for (int wt = 1; wt < threads_wanted; wt++) {
-    workers.push_back(std::thread(WorkerSide, &taskQ, pub_ptr));
-  }
   for (size_t i = 0; i < conf.iterations; ++i) {
     Elapsed elapsed;
     // update gradients for ALL data points
