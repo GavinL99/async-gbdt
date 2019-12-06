@@ -110,7 +110,7 @@ namespace gbdt {
       return list_[processed_++];
     }
 
-    int get_processed() { return processed_ };
+    int get_processed() { return processed_; };
 
     T* get_elem(int idx) {
       return list_[idx];

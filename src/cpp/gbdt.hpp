@@ -41,7 +41,7 @@ class GBDT {
 
   void ReleaseTrees() {
     if (trees) {
-      for (int i = 0; i < iterations; ++i) {
+      for (size_t i = 0; i < iterations; ++i) {
         delete trees[i];
       }
       delete[] trees;
