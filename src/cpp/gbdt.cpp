@@ -142,7 +142,6 @@ void GBDT::Fit_Async(DataVector *d, int threads_wanted) {
   ReleaseTrees();
   size_t dsize = d->size();
   bias = conf.loss->GetBias(d, dsize);
-  size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
   // only for server: store temp value of pred for all data points
   std::vector <ValueType> temp_pred(dsize, bias);
   // ptr protected by RW lock

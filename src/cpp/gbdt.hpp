@@ -17,7 +17,7 @@ class GBDT {
 
   void Fit_OMP(DataVector *d);
 
-  void Fit_Async(DataVector *d);
+  void Fit_Async(DataVector *d, int threads_wanted);
 
   std::string Save() const;
   void Load(const std::string &s);
@@ -35,7 +35,7 @@ class GBDT {
   ValueType PredictAsync(const Tuple &t, RegressionTree *tree, ValueType temp_pred) const;
 
   void WorkerSide();
-  void ServerSide(int, std::vector<ValueType>&);
+  void ServerSide(int dsize, int iter, std::vector<ValueType>& temp_pred);
 
 
 
