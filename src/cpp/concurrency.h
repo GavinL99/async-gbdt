@@ -31,8 +31,6 @@ namespace gbdt {
       uniq_lock latch(mutex_);
     }
 
-    DISALLOW_COPY_AND_ASSIGN(ReaderWriterLatch);
-
     /**
      * Acquire a write latch.
      */
@@ -94,12 +92,6 @@ namespace gbdt {
   class ConcurrentVector {
   public:
     ConcurrentVector() : processed_(0) {} = explicit ;
-
-    ~ConcurrentVector() {
-      for (T *t: list_) {
-        delete t;
-      }
-    }
 
     void push_and_notify(T *data) {
       uniq_lock latch(latch_);
