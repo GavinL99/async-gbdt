@@ -46,6 +46,11 @@ namespace gbdt {
     return r;
   }
 
+  ValueType GBDT::PredictAsync(const Tuple &t, RegressionTree *tree, ValueType temp_pred) const {
+    temp_pred += shrinkage / NUM_INDEP_TREES * tree->Predict(t);
+    return temp_pred;
+  }
+
   /**
    * Prediction from prev iteration
    * @param t
@@ -72,78 +77,58 @@ namespace gbdt {
     return temp_pred;
   }
 
-  void GBDT::ServerSide(std::queue<RegressionTree *> &taskQ, ValueType *pub_ptr, int dsize) {
-    ValueType private_L[dsize];
-    ValueType tempL = *pub_ptr;
-    std::copy(std::begin(tempL), std::end(tempL), std::begin(private_L));
-    ValueType *priv_ptr;
-    priv_ptr = private_L;
-
-    while (true) {
-      while (taskQ.empty()) {
-        //wait for a new tree to be made
-        break;
-      }
-      //under lock
-      RegressionTree curr_tree = taskQ.pop();
-
-      trees.push_back(curr_tree);
-      //Compute the updated L
-      for (int j = 0; j < dsize; ++j) {
-        if (i > 0) {
-          *priv_ptr[j] = Predict_OMP(*(d->at(j)), i, *pub_ptr[j]);
-        }
-        conf.loss->UpdateGradient(d->at(j), *priv_ptr[j]);
-      }
-      //under lock
-      ValueType *temp_ptr = priv_ptr;
-      priv_ptr = pub_ptr;
-      pub_ptr = temp_ptr;
-      break;
-    }
-
-  }
-
   /*
    * Generate a random sample of index first
    * Take read lock and fit a new tree
    * push it to the forest vector
    */
-  void GBDT::WorkerSide() {
-    int dsize = data_ptr_->size();
+  void GBDT::WorkerSide(int dsize) {
+    std::cout << "Worker Starts\n" << std::endl;
     int sample_sz = dsize * TREE_SAMPLE_THRESHOLD;
-    std::vector<int> sample_idx;
-    sample_idx.reserve(sample_sz);
     DataVector sample;
     sample.reserve(sample_sz);
 
-
     while (!server_finish_) {
-      // random sample of index...
-
       // get read lock to access data ptr
       data_ptr_lock_.RLock();
-
-      // TODO: separate d and temp_pred so d is Read-only
-      for (int i = 0; i < sample_sz; ++i) {
-
-
-      }
+      std::sample(data_ptr_->begin(), data_ptr_->end(),
+                  std::back_inserter(sample),
+                  sample_sz, std::mt19937{std::random_device{}()});
+      data_ptr_lock_.RUnlock();
       RegressionTree *iter_tree = new RegressionTree(conf);
       iter_tree->Fit(&sample, sample_sz);
       trees_vec_.push_and_notify(iter_tree);
+      sample.clear();
     }
-
+    std::cout << "Worker joins\n" << std::endl;
   }
 }
 
 /*
+ * temp_pred: cumulative predictions; already init outside
  * Pull a new tree if non-empty
  * Update the private data_vec (L)
  * once finish, acquire write lock and swap pointers
  */
-void GBDT::ServerSide(int num_iter) {
-
+void GBDT::ServerSide(int dsize, int num_iter, std::vector<ValueType>& temp_pred) {
+  int update_count = 0;
+  assert(!server_finish);
+  while (update_count < num_iter) {
+    Elapsed elapsed;
+    RegressionTree *new_tree = trees_vec_.wait_and_consume();
+    data_ptr_lock_.WLock();
+    for (int j = 0; j < dsize; ++j) {
+      temp_pred[j] = PredictAsync(*(data_ptr_->at(j)), new_tree, temp_pred[j]);
+      conf.loss->UpdateGradient(data_ptr_->at(j), temp_pred[j]);
+    }
+    data_ptr_lock_.WUnlock();
+    update_count += 1;
+    long fitting_time = elapsed.Tell().ToMilliseconds();
+    if (conf.debug) {
+      std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds\n"
+                << std::endl;
+    }
+  server_finish_ = true;
 }
 
 
@@ -158,66 +143,38 @@ void GBDT::Fit_Async(DataVector *d, int threads_wanted) {
   size_t dsize = d->size();
   bias = conf.loss->GetBias(d, dsize);
   size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
-  // store temp value of pred for all data points
+  // only for server: store temp value of pred for all data points
   std::vector <ValueType> temp_pred(dsize, bias);
-  data_ptr_ = &temp_pred;
-
+  // ptr protected by RW lock
+  data_ptr_ = d;
+  // init target and grad for Datavector
+  for (int j = 0; j < dsize; ++j) {
+    temp_pred[j] = Predict_OMP(*(d->at(j)), 0, temp_pred[j]);
+    conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
+  }
+  // launch threads
   std::vector <std::thread> workers;
   workers.reserve(threads_wanted - 1);
   for (int wt = 0; wt < threads_wanted - 1; wt++) {
-    workers.push_back(std::thread([=] { this->Workside() };));
+    workers.push_back(std::thread([=] { this->Workside(dsize) };));
   }
-  Serverside(conf.iterations);
+  Serverside(dsize, conf.iterations, temp_pred);
   for (int wt = 0; wt < threads_wanted - 1; wt++) {
     workers[i].join();
   }
   data_ptr_ = nullptr;
 
-
-  for (size_t i = 0; i < conf.iterations; ++i) {
-    Elapsed elapsed;
-    // update gradients for ALL data points
-    // update cumulative pred and target field in tuples
-#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred) schedule(dynamic)
-    for (int j = 0; j < dsize; ++j) {
-      if (i > 0) {
-        temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
-      }
-      conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
-    }
-
-    // build trees independently
-#pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
-    for (int j = 0; j < NUM_INDEP_TREES; ++j) {
-      // take a random sample
-      DataVector sample;
-      sample.reserve(dsize);
-      // needs c++ 17
-      std::sample(d->begin(), d->end(),
-                  std::back_inserter(sample),
-                  sample_sz, std::mt19937{std::random_device{}()});
-      RegressionTree *iter_tree = trees[i * NUM_INDEP_TREES + j];
-      // fit a new tree based on updated target of tuples
-      iter_tree->Fit(&sample, sample_sz);
-    }
-
-    long fitting_time = elapsed.Tell().ToMilliseconds();
-    if (conf.debug) {
-      std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
-                << ", loss: " << GetLoss(d, d->size(), i, temp_pred) << std::endl;
-    }
-  }
-
   // Calculate gain
+  std::cout << "Processed trees in total: " <<  tree_vec_.get_processed() << std::endl;
+  assert(tree_vec_.get_processed() >= conf.iterations);
   delete[] gain;
   gain = new double[conf.number_of_feature];
 
   for (size_t i = 0; i < conf.number_of_feature; ++i) {
     gain[i] = 0.0;
   }
-
-  for (size_t j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
-    double *g = trees[j]->GetGain();
+  for (size_t j = 0; j < conf.iterations; ++j) {
+    double *g = tree_vec_.get_elem(j)->GetGain();
     for (size_t i = 0; i < conf.number_of_feature; ++i) {
       gain[i] += g[i];
     }

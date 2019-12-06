@@ -32,9 +32,10 @@ class GBDT {
   double GetLoss(DataVector *d, size_t samples, int i, ValueType* temp_pred);
 
   ValueType Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
+  ValueType PredictAsync(const Tuple &t, RegressionTree *tree, ValueType temp_pred) const;
 
   void WorkerSide();
-  void ServerSide(int);
+  void ServerSide(int, std::vector<ValueType>&);
 
 
 
@@ -56,7 +57,7 @@ class GBDT {
   size_t iterations;
 
   // for async concurrency
-  std::vector<ValueType>& data_ptr_;
+  DataVector* data_ptr_;
   ReaderWriterLatch data_ptr_lock_;
   ConcurrentVector<RegressionTree> trees_vec_;
   bool server_finish_{false};

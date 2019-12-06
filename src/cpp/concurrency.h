@@ -110,12 +110,18 @@ namespace gbdt {
       }
     }
 
-    T *wait_and_consume() {
+    T* wait_and_consume() {
       uniq_lock latch(latch_);
       while (list_.size() == processed_) {
         cv_.wait(latch);
       }
       return list_[processed_++];
+    }
+
+    int get_processed() { return processed_ };
+
+    T* get_elem(int idx) {
+      return list_[idx];
     }
 
   private:
