@@ -88,10 +88,10 @@ namespace gbdt {
    * The good thing about a vector is we can maintain the forest in place and don't need to change prediction
    * function much
    */
-  template<Typename T>
+  template<typename T>
   class ConcurrentVector {
   public:
-    ConcurrentVector() : processed_(0) {} = explicit ;
+    ConcurrentVector() : processed_(0) {};
 
     void push_and_notify(T *data) {
       uniq_lock latch(latch_);
