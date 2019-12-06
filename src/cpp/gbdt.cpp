@@ -102,9 +102,24 @@ namespace gbdt {
 
   }
 
-  void GBDT::WorkerSide(std::queue<RegressionTree *> &taskQ,, ValueType
+  void GBDT::WorkerSide(std::queue<RegressionTree *> &taskQ,, ValueType* pub_ptr) {
+    while(true) {
+    //under lock get a random subset of the latest L
+    // take a random sample
+      DataVector sample;
+      sample.reserve(dsize);
+      // needs c++ 17
+      std::sample(d->begin(), d->end(),
+                  std::back_inserter(sample),
+                  sample_sz, std::mt19937{std::random_device{}()});
+      RegressionTree *curr_tree = trees[i * NUM_INDEP_TREES + j];
+      // fit a new tree based on updated target of tuples
+      curr_tree->Fit(&sample, sample_sz);
 
-  * pub_ptr) {
+      //Lock the queue and push the new tree
+      taskQ.push(curr_tree);
+    }
+  }
 
 }
 
@@ -121,43 +136,24 @@ void GBDT::Fit(DataVector *d, int threads_wanted) {
   ValueType *pub_ptr;
   pub_ptr = temp_pred;
 
+  Elapsed elapsed;
+
   std::thread server(ServerSide, &taskQ, pub_ptr, dsize);
   std::vector <std::thread> workers;
   for (int wt = 1; wt < threads_wanted; wt++) {
     workers.push_back(std::thread(WorkerSide, &taskQ, pub_ptr));
   }
-  for (size_t i = 0; i < conf.iterations; ++i) {
-    Elapsed elapsed;
-    // update gradients for ALL data points
-    // update cumulative pred and target field in tuples
-#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred) schedule(dynamic)
-    for (int j = 0; j < dsize; ++j) {
-      if (i > 0) {
-        temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
-      }
-      conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
-    }
 
-    // build trees independently
-#pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
-    for (int j = 0; j < NUM_INDEP_TREES; ++j) {
-      // take a random sample
-      DataVector sample;
-      sample.reserve(dsize);
-      // needs c++ 17
-      std::sample(d->begin(), d->end(),
-                  std::back_inserter(sample),
-                  sample_sz, std::mt19937{std::random_device{}()});
-      RegressionTree *iter_tree = trees[i * NUM_INDEP_TREES + j];
-      // fit a new tree based on updated target of tuples
-      iter_tree->Fit(&sample, sample_sz);
-    }
+  for(int i = 0; i < workers.size() ; i++)
+   {
+       workers.at(i).join();
+   }
+   server.join();
 
-    long fitting_time = elapsed.Tell().ToMilliseconds();
-    if (conf.debug) {
-      std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
-                << ", loss: " << GetLoss(d, d->size(), i, temp_pred) << std::endl;
-    }
+  long fitting_time = elapsed.Tell().ToMilliseconds();
+  if (conf.debug) {
+    std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
+              << ", loss: " << GetLoss(d, d->size(), i, temp_pred) << std::endl;
   }
 
   // Calculate gain
