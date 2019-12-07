@@ -157,18 +157,18 @@ namespace gbdt {
     std::vector <std::thread> workers;
     workers.reserve(threads_wanted - 1);
     for (int wt = 0; wt < threads_wanted - 1; wt++) {
-      workers.push_back(std::thread([=] { this->Workside(dsize) };));
+      workers.push_back(std::thread([=] { this->WorkerSide(dsize); }));
     }
     Serverside(dsize, iterations * NUM_INDEP_TREES, temp_pred, threads_wanted);
-    for (int wt = 0; wt < threads_wanted - 1; wt++) {
+    for (int i = 0; i < threads_wanted - 1; i++) {
       workers[i].join();
     }
     data_ptr_ = nullptr;
     server_finish_ = false;
 
     // Calculate gain
-    std::cout << "Processed trees in total: " << tree_vec_.get_processed() << std::endl;
-    assert(tree_vec_.get_processed() >= iterations * NUM_INDEP_TREES);
+    std::cout << "Processed trees in total: " << trees_vec_.get_processed() << std::endl;
+    assert(trees_vec_.get_processed() >= iterations * NUM_INDEP_TREES);
     delete[] gain;
     gain = new double[conf.number_of_feature];
 
@@ -176,7 +176,7 @@ namespace gbdt {
       gain[i] = 0.0;
     }
     for (size_t j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
-      double *g = tree_vec_.get_elem(j)->GetGain();
+      double *g = trees_vec_.get_elem(j)->GetGain();
       for (size_t i = 0; i < conf.number_of_feature; ++i) {
         gain[i] += g[i];
       }
