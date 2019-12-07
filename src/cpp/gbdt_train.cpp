@@ -85,11 +85,12 @@ int main(int argc, char *argv[]) {
   std::cout << "training time: " << elapsed.Tell().ToMilliseconds() << " milliseconds" << std::endl;
   CleanDataVector(&d);
   FreeVector(&d);
+  std::cout << "Clean up...\n";
 
   std::string model_file = train_file + ".model";
   std::ofstream model_output(model_file.c_str());
   model_output << gbdt.Save();
-
+  std::cout << "Model saved...\n";
   double *g = gbdt.GetGain();
   std::cout << "feature index\tfeature gain" << std::endl;
   for (size_t i = 0; i < conf.number_of_feature; ++i) {
