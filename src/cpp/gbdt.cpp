@@ -75,7 +75,7 @@ namespace gbdt {
       return bias;
     }
     size_t start = (n - 1) * conf.num_of_threads;
-    size_t end = std::min(n * conf.num_of_threads, conf.num_trees);
+    size_t end = conf.num_trees < n * conf.num_of_threads? conf.num_trees: n * conf.num_of_threads;
 
     for (size_t i = start; i < end; ++i) {
       temp_pred += shrinkage * trees[i]->Predict(t);
