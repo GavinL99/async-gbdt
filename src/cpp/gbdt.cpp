@@ -168,11 +168,11 @@ namespace gbdt {
 
     // Calculate gain
     std::cout << "Processed trees in total: " << trees_vec_.get_processed() <<
-    "should be: " << iterations * NUM_INDEP_TREES << std::endl;
+    " should be: " << iterations * NUM_INDEP_TREES << std::endl;
     assert(trees_vec_.get_processed() >= iterations * NUM_INDEP_TREES);
-    delete[] gain;
-    gain = new double[conf.number_of_feature];
+    std::cout << "Calculate gains...\n" << std::endl;
 
+    gain = new double[conf.number_of_feature];
     for (int i = 0; i < conf.number_of_feature; ++i) {
       gain[i] = 0.0;
     }
