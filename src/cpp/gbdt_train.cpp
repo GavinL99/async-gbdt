@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 
   std::string model_file = train_file + ".model";
   std::ofstream model_output(model_file.c_str());
-  model_output << gbdt.Save();
+  model_output << gbdt.Save(true);
   std::cout << "Model saved...\n";
   double *g = gbdt.GetGain();
   std::cout << "feature index\tfeature gain" << std::endl;

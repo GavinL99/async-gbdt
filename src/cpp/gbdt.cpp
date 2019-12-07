@@ -242,12 +242,16 @@ namespace gbdt {
     }
   }
 
-  std::string GBDT::Save() const {
+  std::string GBDT::Save(bool if_async) const {
     std::vector <std::string> vs;
     vs.push_back(std::to_string(shrinkage));
     vs.push_back(std::to_string(bias));
     for (size_t i = 0; i < iterations; ++i) {
-      vs.push_back(trees[i]->Save());
+      if (if_async) {
+        vs.push_back(trees_vec_[i]->Save());
+      } else {
+        vs.push_back(trees[i]->Save());
+      }
     }
     return JoinString(vs, "\n;\n");
   }
