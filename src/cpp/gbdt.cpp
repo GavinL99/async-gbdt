@@ -274,7 +274,7 @@ namespace gbdt {
 
   GBDT::~GBDT() {
     ReleaseTrees();
-    for (int = 0; i < trees_vec_.size(); i++) {
+    for (int i = 0; i < trees_vec_.size(); i++) {
       delete trees_vec_.get_elem(i);
     }
     delete[] gain;
