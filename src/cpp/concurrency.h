@@ -116,6 +116,12 @@ namespace gbdt {
       return list_[idx];
     }
 
+    void destroy_all() {
+      for (T* t: list_) {
+        delete t;
+      }
+    }
+
   private:
     std::vector<T*> list_;
     mutex_t latch_;
