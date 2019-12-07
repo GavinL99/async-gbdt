@@ -227,8 +227,8 @@ namespace gbdt {
         std::sample(d->begin(), d->end(),
                     std::back_inserter(sample),
                     sample_sz, std::mt19937{std::random_device{}()});
-        if (i * conf.num_of_threads < conf.num_trees) {
-          RegressionTree *iter_tree = trees[i * NUM_INDEP_TREES + j];
+        if (i * conf.num_of_threads + j < conf.num_trees) {
+          RegressionTree *iter_tree = trees[i * conf.num_of_threads + j];
           // fit a new tree based on updated target of tuples
           iter_tree->Fit(&sample, sample_sz);
         }
@@ -261,7 +261,7 @@ namespace gbdt {
     std::vector <std::string> vs;
     vs.push_back(std::to_string(shrinkage));
     vs.push_back(std::to_string(bias));
-    for (size_t i = 0; i < iterations; ++i) {
+    for (size_t i = 0; i < conf.num_trees; ++i) {
       if (if_async) {
         RegressionTree* t = trees_vec_.get_elem(i);
         vs.push_back(t->Save());
@@ -277,18 +277,17 @@ namespace gbdt {
     std::vector <std::string> vs;
     SplitString(s, "\n;\n", &vs);
 
-    iterations = vs.size() - 2;
     shrinkage = std::stod(vs[0]);
     bias = std::stod(vs[1]);
 
     ReleaseTrees();
 
-    conf.iterations = iterations;
-    trees = new RegressionTree *[iterations];
-    for (int i = 0; i < iterations; ++i) {
+    conf.iterations = vs.size() - 2;
+    trees = new RegressionTree *[conf.iterations];
+    for (int i = 0; i < conf.iterations; ++i) {
       trees[i] = new RegressionTree(conf);
     }
-    for (size_t i = 0; i < iterations; ++i) {
+    for (size_t i = 0; i < conf.iterations; ++i) {
       trees[i]->Load(vs[i + 2]);
     }
   }
