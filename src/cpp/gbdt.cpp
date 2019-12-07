@@ -116,7 +116,7 @@ namespace gbdt {
  * Update the private data_vec (L)
  * once finish, acquire write lock and swap pointers
  */
-  void GBDT::ServerSide(int dsize, td::vector <ValueType> &temp_pred) {
+  void GBDT::ServerSide(int dsize, std::vector <ValueType> &temp_pred) {
     std::cout << "Server Starts\n" << std::endl;
     int update_count = 0;
     assert(!server_finish_);
