@@ -117,7 +117,7 @@ namespace gbdt {
       Elapsed elapsed;
       RegressionTree *new_tree = trees_vec_.wait_and_consume();
       data_ptr_lock_.WLock();
-#pragma omp parallel for default(none) shared(temp_pred, data_ptr_, new_tree, conf) schedule(dynamic)
+#pragma omp parallel for default(none) shared(dsize, temp_pred, data_ptr_, new_tree, conf) schedule(dynamic)
       for (int j = 0; j < dsize; ++j) {
         temp_pred[j] = PredictAsync(*(data_ptr_->at(j)), new_tree, temp_pred[j]);
         conf.loss->UpdateGradient(data_ptr_->at(j), temp_pred[j]);
