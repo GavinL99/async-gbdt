@@ -148,7 +148,7 @@ namespace gbdt {
     // ptr protected by RW lock
     data_ptr_ = d;
     // init target and grad for Datavector
-    for (int j = 0; j < dsize; ++j) {
+    for (size_t j = 0; j < dsize; ++j) {
       temp_pred[j] = Predict_OMP(*(d->at(j)), 0, temp_pred[j]);
       conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
     }
@@ -159,7 +159,7 @@ namespace gbdt {
     for (int wt = 0; wt < threads_wanted - 1; wt++) {
       workers.push_back(std::thread([=] { this->WorkerSide(dsize); }));
     }
-    Serverside(dsize, iterations * NUM_INDEP_TREES, temp_pred, threads_wanted);
+    ServerSide(dsize, iterations * NUM_INDEP_TREES, temp_pred);
     for (int i = 0; i < threads_wanted - 1; i++) {
       workers[i].join();
     }
@@ -172,10 +172,10 @@ namespace gbdt {
     delete[] gain;
     gain = new double[conf.number_of_feature];
 
-    for (size_t i = 0; i < conf.number_of_feature; ++i) {
+    for (int i = 0; i < conf.number_of_feature; ++i) {
       gain[i] = 0.0;
     }
-    for (size_t j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
+    for (int j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
       double *g = trees_vec_.get_elem(j)->GetGain();
       for (size_t i = 0; i < conf.number_of_feature; ++i) {
         gain[i] += g[i];
@@ -183,7 +183,7 @@ namespace gbdt {
     }
   }
 
-  void GBDT::Fit_OMP(DataVector *d, int threads_wanted) {
+  void GBDT::Fit_OMP(DataVector *d) {
     ReleaseTrees();
     size_t dsize = d->size();
     Init(*d);
@@ -195,7 +195,7 @@ namespace gbdt {
       Elapsed elapsed;
       // update gradients for ALL data points
       // update cumulative pred and target field in tuples
-#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred) schedule(dynamic)
+#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred schedule(dynamic)
       for (int j = 0; j < dsize; ++j) {
         if (i > 0) {
           temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
