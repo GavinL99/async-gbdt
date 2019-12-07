@@ -67,7 +67,6 @@ namespace gbdt {
   ValueType GBDT::Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const {
     if (!trees)
       return kUnknownValue;
-    assert(n <= iterations);
 
     if (n == 0) {
       if (conf.enable_initial_guess) {
@@ -75,9 +74,11 @@ namespace gbdt {
       }
       return bias;
     }
+    size_t start = (n - 1) * conf.num_of_threads;
+    size_t end = std::min(n * conf.num_of_threads, conf.num_trees);
 
-    for (size_t i = (n - 1) * NUM_INDEP_TREES; i < n * NUM_INDEP_TREES; ++i) {
-      temp_pred += shrinkage / NUM_INDEP_TREES * trees[i]->Predict(t);
+    for (size_t i = start; i < end; ++i) {
+      temp_pred += shrinkage * trees[i]->Predict(t);
     }
 
     return temp_pred;
