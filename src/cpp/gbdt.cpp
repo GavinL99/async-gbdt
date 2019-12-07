@@ -167,7 +167,8 @@ namespace gbdt {
     server_finish_ = false;
 
     // Calculate gain
-    std::cout << "Processed trees in total: " << trees_vec_.get_processed() << std::endl;
+    std::cout << "Processed trees in total: " << trees_vec_.get_processed() <<
+    "should be: " << iterations * NUM_INDEP_TREES << std::endl;
     assert(trees_vec_.get_processed() >= iterations * NUM_INDEP_TREES);
     delete[] gain;
     gain = new double[conf.number_of_feature];
