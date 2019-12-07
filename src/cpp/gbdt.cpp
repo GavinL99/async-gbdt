@@ -147,6 +147,7 @@ namespace gbdt {
     std::vector <ValueType> temp_pred(dsize, bias);
     // ptr protected by RW lock
     data_ptr_ = d;
+    std::cout << "Async start initialization..\n" << std::endl;
     // init target and grad for Datavector
     for (size_t j = 0; j < dsize; ++j) {
       temp_pred[j] = Predict_OMP(*(d->at(j)), 0, temp_pred[j]);

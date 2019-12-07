@@ -81,6 +81,7 @@ int main(int argc, char *argv[]) {
   Elapsed elapsed;
 
 //  gbdt.Fit(&d,threads_wanted);
+  std::cout << "Start training..\n" << std::endl;
   gbdt.Fit_Async(&d,threads_wanted);
   std::cout << "training time: " << elapsed.Tell().ToMilliseconds() << " milliseconds" << std::endl;
   CleanDataVector(&d);
