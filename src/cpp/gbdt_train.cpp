@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
   opt.AddOption("loss", "l", "loss", "SquaredError");
   opt.AddOption("train_file", "F", "train_file", OptionType::STRING, true);
   opt.AddOption("custom_loss_so", "c", "custom_loss_so", "");
+  opt.AddOption("use_async", "asy", "use_async", false);
 
   if (!opt.ParseOptions(argc, argv)) {
     opt.Help();
@@ -82,8 +83,14 @@ int main(int argc, char *argv[]) {
   Elapsed elapsed;
 
 //  gbdt.Fit(&d,threads_wanted);
-  std::cout << "Start training..\n" << std::endl;
-  gbdt.Fit_Async(&d, threads_wanted);
+  bool if_async;
+  opt.Get("use_async", &if_async);
+  std::cout << "Start training, Async: " << if_async << std::endl;
+  if (if_async) {
+    gbdt.Fit_Async(&d, threads_wanted);
+  } else {
+    gbdt.Fit_OMP(&d);
+  }
   std::cout << "training time: " << elapsed.Tell().ToMilliseconds() << " milliseconds" << std::endl;
   CleanDataVector(&d);
   FreeVector(&d);
