@@ -274,8 +274,8 @@ namespace gbdt {
 
   GBDT::~GBDT() {
     ReleaseTrees();
-    for (RegressionTree *tree: trees_vec_) {
-      delete tree;
+    for (int = 0; i < trees_vec_.size(); i++) {
+      delete trees_vec_.get_elem(i);
     }
     delete[] gain;
   }
