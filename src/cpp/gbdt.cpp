@@ -221,7 +221,7 @@ namespace gbdt {
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
         std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
-                  << ", loss: " << GetLoss(d, d->size(), i, &temp_pred) << std::endl;
+                  << ", loss: " << GetLoss(d, d->size(), i, temp_pred) << std::endl;
       }
     }
 
@@ -278,7 +278,7 @@ namespace gbdt {
     delete[] gain;
   }
 
-  double GBDT::GetLoss(DataVector *d, size_t samples, int i, ValueType *temp_pred) {
+  double GBDT::GetLoss(DataVector *d, size_t samples, int i, std::vector<ValueType> temp_pred) {
     double s = 0.0;
 #ifdef USE_OPENMP
 #pragma omp parallel for reduction(+:s)
