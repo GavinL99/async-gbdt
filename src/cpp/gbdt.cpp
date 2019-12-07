@@ -121,13 +121,15 @@ namespace gbdt {
         temp_pred[j] = PredictAsync(*(data_ptr_->at(j)), new_tree, temp_pred[j]);
         conf.loss->UpdateGradient(data_ptr_->at(j), temp_pred[j]);
       }
-      data_ptr_lock_.WUnlock();
       update_count += 1;
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
-        std::cout << "iteration: " << update_count << ", time: " << fitting_time << " milliseconds\n"
-                  << std::endl;
+        if (update_count % NUM_INDEP_TREES == 0) {
+          std::cout << "iteration: " << update_count << ", time: " << fitting_time << " milliseconds" << ", loss: "
+          << GetLoss(d, d->size(), i, temp_pred) << std::endl;
+        }
       }
+      data_ptr_lock_.WUnlock();
     }
     server_finish_ = true;
   }
