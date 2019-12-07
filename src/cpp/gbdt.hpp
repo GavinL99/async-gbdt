@@ -21,7 +21,7 @@ namespace gbdt {
 
     void Fit_Async(DataVector *d, int threads_wanted);
 
-    std::string Save(bool) const;
+    std::string Save(bool);
 
     void Load(const std::string &s);
 

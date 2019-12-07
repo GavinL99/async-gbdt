@@ -242,13 +242,13 @@ namespace gbdt {
     }
   }
 
-  std::string GBDT::Save(bool if_async) const {
+  std::string GBDT::Save(bool if_async) {
     std::vector <std::string> vs;
     vs.push_back(std::to_string(shrinkage));
     vs.push_back(std::to_string(bias));
     for (size_t i = 0; i < iterations; ++i) {
       if (if_async) {
-        const RegressionTree* t = trees_vec_.get_elem(i);
+        RegressionTree* t = trees_vec_.get_elem(i);
         vs.push_back(t->Save());
       } else {
         vs.push_back(trees[i]->Save());
