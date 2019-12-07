@@ -221,7 +221,7 @@ namespace gbdt {
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
         std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds"
-                  << ", loss: " << GetLoss(d, d->size(), i, temp_pred) << std::endl;
+                  << ", loss: " << GetLoss(d, d->size(), i, &temp_pred) << std::endl;
       }
     }
 
