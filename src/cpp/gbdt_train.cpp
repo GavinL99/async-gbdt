@@ -17,7 +17,7 @@ Objective* create__SquaredError() { return new SquaredError(); }
 
 int main(int argc, char *argv[]) {
   CmdOption opt;
-  opt.AddOption("threads", "t", "threads", 1);
+  opt.AddOption("num_of_threads", "t", "num_of_threads", 1);
   opt.AddOption("feature_size", "f", "feature_size", OptionType::INT, true);
   opt.AddOption("max_depth", "d", "max_depth", 4);
   opt.AddOption("iterations", "n", "iterations", 10);
