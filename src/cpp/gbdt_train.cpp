@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
   Elapsed elapsed;
 
   std::cout << "Start training, Async: " << conf.use_async << std::endl;
-  if (if_async) {
+  if (conf.use_async) {
     gbdt.Fit_Async(&d);
   } else {
     gbdt.Fit_OMP(&d);
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 
   std::string model_file = train_file + ".model";
   std::ofstream model_output(model_file.c_str());
-  model_output << gbdt.Save(if_async);
+  model_output << gbdt.Save(conf.use_async);
   std::cout << "Model saved...\n";
   double *g = gbdt.GetGain();
   std::cout << "feature index\tfeature gain" << std::endl;
