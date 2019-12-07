@@ -17,6 +17,11 @@
 #define PRINT_TREE_INTERVAL 50
 
 namespace gbdt {
+  GBDT::~GBDT() {
+    ReleaseTrees();
+    trees_vec_.destroy_all();
+    delete[] gain;
+  }
 
   void GBDT::Init(DataVector &d) {
     if (conf.enable_initial_guess) {
@@ -24,8 +29,8 @@ namespace gbdt {
     }
     // this computes the weighted mean as init guess
     bias = conf.loss->GetBias(d, d.size());
-    trees = new RegressionTree *[conf.iterations * NUM_INDEP_TREES];
-    for (int i = 0; i < conf.iterations * NUM_INDEP_TREES; ++i) {
+    trees = new RegressionTree *[conf.num_trees];
+    for (int i = 0; i < conf.num_trees; ++i) {
       trees[i] = new RegressionTree(conf);
     }
   }
@@ -40,15 +45,15 @@ namespace gbdt {
       r = t.initial_guess;
     }
 
-    for (size_t i = 0; i < iterations * NUM_INDEP_TREES; ++i) {
-      r += shrinkage * trees[i]->Predict(t) / NUM_INDEP_TREES;
+    for (size_t i = 0; i < conf.num_trees; ++i) {
+      r += shrinkage * trees[i]->Predict(t);
     }
 
     return r;
   }
 
   ValueType GBDT::PredictAsync(const Tuple &t, RegressionTree *tree, ValueType temp_pred) const {
-    temp_pred += shrinkage / NUM_INDEP_TREES * tree->Predict(t);
+    temp_pred += shrinkage * tree->Predict(t);
     return temp_pred;
   }
 
@@ -196,6 +201,8 @@ namespace gbdt {
     size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
     // store temp value of pred for all data points
     std::vector <ValueType> temp_pred(dsize, bias);
+    // assume in each iteration, num_of_threads number of trees will be built
+    int iterations = conf.num_trees / conf.num_of_threads;
 
     for (size_t i = 0; i < iterations; ++i) {
       Elapsed elapsed;
@@ -211,7 +218,7 @@ namespace gbdt {
 
       // build trees independently
 #pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
-      for (int j = 0; j < NUM_INDEP_TREES; ++j) {
+      for (int j = 0; j < conf.num_of_threads; ++j) {
         // take a random sample
         DataVector sample;
         sample.reserve(dsize);
@@ -219,9 +226,11 @@ namespace gbdt {
         std::sample(d->begin(), d->end(),
                     std::back_inserter(sample),
                     sample_sz, std::mt19937{std::random_device{}()});
-        RegressionTree *iter_tree = trees[i * NUM_INDEP_TREES + j];
-        // fit a new tree based on updated target of tuples
-        iter_tree->Fit(&sample, sample_sz);
+        if (i * conf.num_of_threads < conf.num_trees) {
+          RegressionTree *iter_tree = trees[i * NUM_INDEP_TREES + j];
+          // fit a new tree based on updated target of tuples
+          iter_tree->Fit(&sample, sample_sz);
+        }
       }
 
       long fitting_time = elapsed.Tell().ToMilliseconds();
@@ -239,7 +248,7 @@ namespace gbdt {
       gain[i] = 0.0;
     }
 
-    for (size_t j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
+    for (size_t j = 0; j < conf.num_trees; ++j) {
       double *g = trees[j]->GetGain();
       for (size_t i = 0; i < conf.number_of_feature; ++i) {
         gain[i] += g[i];
@@ -281,12 +290,6 @@ namespace gbdt {
     for (size_t i = 0; i < iterations; ++i) {
       trees[i]->Load(vs[i + 2]);
     }
-  }
-
-  GBDT::~GBDT() {
-    ReleaseTrees();
-    trees_vec_.destroy_all();
-    delete[] gain;
   }
 
   double GBDT::GetLoss(DataVector *d, size_t samples, int i, std::vector<ValueType> temp_pred) {

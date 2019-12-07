@@ -14,7 +14,6 @@ namespace gbdt {
                            conf(conf),
                            gain(NULL) {
       shrinkage = conf.shrinkage;
-      iterations = conf.iterations;
     }
 
     void Fit_OMP(DataVector *d);
@@ -49,7 +48,7 @@ namespace gbdt {
 
     void ReleaseTrees() {
       if (trees) {
-        for (size_t i = 0; i < iterations; ++i) {
+        for (size_t i = 0; i < conf.num_trees; ++i) {
           delete trees[i];
         }
         delete[] trees;
@@ -62,7 +61,6 @@ namespace gbdt {
     // for trees
     ValueType bias;
     ValueType shrinkage;
-    size_t iterations;
 
     // for async concurrency
     DataVector *data_ptr_;
