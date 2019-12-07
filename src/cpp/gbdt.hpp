@@ -36,7 +36,7 @@ namespace gbdt {
 
     double GetLoss(DataVector *d, size_t samples, int i, std::vector<ValueType> temp_pred);
 
-    double GetLossSimple(DataVector *d, size_t samples, std::vector<ValueType> temp_pred;)
+    double GetLossSimple(DataVector *d, size_t samples, std::vector<ValueType> temp_pred);
 
     ValueType Predict_OMP(const Tuple &t, size_t n, ValueType temp_pred) const;
 
