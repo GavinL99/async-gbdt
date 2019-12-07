@@ -189,13 +189,13 @@ namespace gbdt {
     Init(*d);
     size_t sample_sz = static_cast<size_t>(dsize * conf.data_sample_ratio);
     // store temp value of pred for all data points
-    std::vector <ValueType> temp_pred(dszie, bias);
+    std::vector <ValueType> temp_pred(dsize, bias);
 
     for (size_t i = 0; i < iterations; ++i) {
       Elapsed elapsed;
       // update gradients for ALL data points
       // update cumulative pred and target field in tuples
-#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred schedule(dynamic)
+#pragma omp parallel for default(none) shared(trees, d, dsize, i, conf, temp_pred) schedule(dynamic)
       for (int j = 0; j < dsize; ++j) {
         if (i > 0) {
           temp_pred[j] = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
