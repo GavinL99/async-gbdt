@@ -43,7 +43,7 @@ namespace gbdt {
 
     void WorkerSide(int dsize);
 
-    void ServerSide(int dsize, int iter, std::vector <ValueType> &temp_pred);
+    void ServerSide(int dsize, std::vector <ValueType> &temp_pred);
 
 
     void ReleaseTrees() {
