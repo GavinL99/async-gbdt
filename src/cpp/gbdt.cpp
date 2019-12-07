@@ -127,8 +127,7 @@ namespace gbdt {
       if (conf.debug) {
         if (update_count % NUM_INDEP_TREES == 0) {
           std::cout << "iteration: " << update_count << ", time: " << fitting_time << " milliseconds" << ", loss: "
-          << std::endl;
-//          << GetLoss(data_ptr_, data_ptr_->size(), i, temp_pred) << std::endl;
+          << GetLossSimple(data_ptr_, data_ptr_->size(), temp_pred) << std::endl;
         }
       }
       data_ptr_lock_.WUnlock();
@@ -298,7 +297,17 @@ namespace gbdt {
       ValueType p = Predict_OMP(*(d->at(j)), i, temp_pred[j]);
       s += conf.loss->GetLoss(*(d->at(j)), p);
     }
+    return s / samples;
+  }
 
+  double GBDT::GetLossSimple(DataVector *d, size_t samples, std::vector<ValueType> temp_pred) {
+    double s = 0.0;
+#ifdef USE_OPENMP
+#pragma omp parallel for reduction(+:s)
+#endif
+    for (size_t j = 0; j < samples; ++j) {
+      s += conf.loss->GetLoss(*(d->at(j)), temp_pred[j]);
+    }
     return s / samples;
   }
 }
