@@ -19,7 +19,7 @@ namespace gbdt {
 
     void Fit_OMP(DataVector *d);
 
-    void Fit_Async(DataVector *d, int threads_wanted);
+    void Fit_Async(DataVector *d);
 
     std::string Save(bool);
 

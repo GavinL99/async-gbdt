@@ -12,8 +12,9 @@
 #include <random>
 
 
-#define NUM_INDEP_TREES 8
-#define TREE_SAMPLE_THRESHOLD 0.3
+//#define NUM_INDEP_TREES 8
+//#define TREE_SAMPLE_THRESHOLD 0.3
+#define PRINT_TREE_INTERVAL 50
 
 namespace gbdt {
 
@@ -84,7 +85,7 @@ namespace gbdt {
    */
   void GBDT::WorkerSide(int dsize) {
     std::cout << "Worker Starts\n" << std::endl;
-    int sample_sz = dsize * TREE_SAMPLE_THRESHOLD;
+    int sample_sz = dsize * conf.tree_sample;
     DataVector sample;
     sample.reserve(sample_sz);
 
@@ -109,11 +110,11 @@ namespace gbdt {
  * Update the private data_vec (L)
  * once finish, acquire write lock and swap pointers
  */
-  void GBDT::ServerSide(int dsize, int num_iter, std::vector <ValueType> &temp_pred) {
+  void GBDT::ServerSide(int dsize, td::vector <ValueType> &temp_pred) {
     std::cout << "Server Starts\n" << std::endl;
     int update_count = 0;
     assert(!server_finish_);
-    while (update_count < num_iter) {
+    while (update_count < conf.num_trees) {
       Elapsed elapsed;
       RegressionTree *new_tree = trees_vec_.wait_and_consume();
       data_ptr_lock_.WLock();
@@ -125,7 +126,7 @@ namespace gbdt {
       update_count += 1;
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
-        if (update_count % NUM_INDEP_TREES == 0) {
+        if (update_count % PRINT_TREE_INTERVAL == 0) {
           std::cout << "iteration: " << update_count << ", time: " << fitting_time << " milliseconds" << ", loss: "
           << GetLossSimple(data_ptr_, data_ptr_->size(), temp_pred) << std::endl;
         }
@@ -142,7 +143,7 @@ namespace gbdt {
  * Join worker threads when the server finishes
  * (e.g. update for certain amount of trees)
  */
-  void GBDT::Fit_Async(DataVector *d, int threads_wanted) {
+  void GBDT::Fit_Async(DataVector *d) {
     ReleaseTrees();
     size_t dsize = d->size();
     bias = conf.loss->GetBias(*d, dsize);
@@ -159,12 +160,12 @@ namespace gbdt {
     std::cout << "Start launching threads..\n" << std::endl;
     // launch threads
     std::vector <std::thread> workers;
-    workers.reserve(threads_wanted - 1);
-    for (int wt = 0; wt < threads_wanted - 1; wt++) {
+    workers.reserve(conf.num_of_threads - 1);
+    for (int wt = 0; wt < conf.num_of_threads - 1; wt++) {
       workers.push_back(std::thread([=] { this->WorkerSide(dsize); }));
     }
-    ServerSide(dsize, iterations * NUM_INDEP_TREES, temp_pred);
-    for (int i = 0; i < threads_wanted - 1; i++) {
+    ServerSide(dsize, temp_pred);
+    for (int i = 0; i < conf.num_of_threads - 1; i++) {
       workers[i].join();
     }
     data_ptr_ = nullptr;
@@ -172,15 +173,15 @@ namespace gbdt {
 
     // Calculate gain
     std::cout << "Processed trees in total: " << trees_vec_.get_processed() <<
-    " should be: " << iterations * NUM_INDEP_TREES << std::endl;
-    assert(trees_vec_.get_processed() >= iterations * NUM_INDEP_TREES);
+    " should be: " << conf.num_trees << std::endl;
+    assert(trees_vec_.get_processed() >= conf.num_trees);
     std::cout << "Calculate gains...\n" << std::endl;
 
     gain = new double[conf.number_of_feature];
     for (int i = 0; i < conf.number_of_feature; ++i) {
       gain[i] = 0.0;
     }
-    for (int j = 0; j < iterations * NUM_INDEP_TREES; ++j) {
+    for (int j = 0; j < trees_vec_.get_processed(); ++j) {
       double *g = trees_vec_.get_elem(j)->GetGain();
       for (size_t i = 0; i < conf.number_of_feature; ++i) {
         gain[i] += g[i];

@@ -34,6 +34,11 @@ class Configure {
 
   bool enable_initial_guess;
 
+  int num_of_threads;
+  bool use_async; // whether to run in async
+  double tree_sample; // % of dataset to use when fit a tree
+  int num_trees;   // num of trees to build in total, this applies to both sync and async!
+
   Configure():
       feature_sample_ratio(1),
       data_sample_ratio(1),

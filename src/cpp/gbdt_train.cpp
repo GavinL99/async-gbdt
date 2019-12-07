@@ -30,18 +30,17 @@ int main(int argc, char *argv[]) {
   opt.AddOption("train_file", "F", "train_file", OptionType::STRING, true);
   opt.AddOption("custom_loss_so", "c", "custom_loss_so", "");
   opt.AddOption("use_async", "asy", "use_async", false);
+  opt.AddOption("tree_sample", "ts", "tree_sample", 0.3);
+  opt.AddOption("num_trees", "nt", "num_trees", 500);
 
   if (!opt.ParseOptions(argc, argv)) {
     opt.Help();
     return -1;
   }
-
-  int threads_wanted = 16;
-  opt.Get("num_of_threads", &threads_wanted);
-  std::cout << "Use Threads: " << threads_wanted << std::endl;
   std::srand ( unsigned ( ::time(0) ) );
 
   Configure conf;
+  opt.Get("num_of_threads", &conf.num_of_threads);
   opt.Get("feature_size", &conf.number_of_feature);
   opt.Get("max_depth", &conf.max_depth);
   opt.Get("iterations", &conf.iterations);
@@ -50,6 +49,10 @@ int main(int argc, char *argv[]) {
   opt.Get("data_ratio", &conf.data_sample_ratio);
   opt.Get("debug", &conf.debug);
   opt.Get("min_leaf_size", &conf.min_leaf_size);
+  opt.Get("use_async", &conf.use_async);
+  opt.Get("tree_sample", &conf.tree_sample);
+  opt.Get("num_trees", &conf.num_trees);
+
 //  std::string loss_type;
 //  opt.Get("loss", &loss_type);
   std::string loss_type = "SquaredError";
@@ -82,12 +85,9 @@ int main(int argc, char *argv[]) {
 
   Elapsed elapsed;
 
-//  gbdt.Fit(&d,threads_wanted);
-  bool if_async;
-  opt.Get("use_async", &if_async);
-  std::cout << "Start training, Async: " << if_async << std::endl;
+  std::cout << "Start training, Async: " << conf.use_async << std::endl;
   if (if_async) {
-    gbdt.Fit_Async(&d, threads_wanted);
+    gbdt.Fit_Async(&d);
   } else {
     gbdt.Fit_OMP(&d);
   }
