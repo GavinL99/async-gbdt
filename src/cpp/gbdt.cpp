@@ -248,7 +248,8 @@ namespace gbdt {
     vs.push_back(std::to_string(bias));
     for (size_t i = 0; i < iterations; ++i) {
       if (if_async) {
-        vs.push_back(trees_vec_.get_elem(i)->Save());
+        RegressionTree* t = trees_vec_.get_elem(i);
+        vs.push_back(t->Save());
       } else {
         vs.push_back(trees[i]->Save());
       }
