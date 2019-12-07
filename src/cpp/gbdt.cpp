@@ -109,11 +109,11 @@ namespace gbdt {
  * Update the private data_vec (L)
  * once finish, acquire write lock and swap pointers
  */
-  void GBDT::ServerSide(int dsize, int num_iter, std::vector <ValueType> &temp_pred, int threads_wanted) {
+  void GBDT::ServerSide(int dsize, int num_iter, std::vector <ValueType> &temp_pred) {
     std::cout << "Server Starts\n" << std::endl;
     int update_count = 0;
     assert(!server_finish_);
-    while (update_count < num_iter * threads_wanted) {
+    while (update_count < num_iter) {
       Elapsed elapsed;
       RegressionTree *new_tree = trees_vec_.wait_and_consume();
       data_ptr_lock_.WLock();
@@ -125,7 +125,7 @@ namespace gbdt {
       update_count += 1;
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
-        std::cout << "iteration: " << i << ", time: " << fitting_time << " milliseconds\n"
+        std::cout << "iteration: " << update_count << ", time: " << fitting_time << " milliseconds\n"
                   << std::endl;
       }
     }
@@ -142,7 +142,7 @@ namespace gbdt {
   void GBDT::Fit_Async(DataVector *d, int threads_wanted) {
     ReleaseTrees();
     size_t dsize = d->size();
-    bias = conf.loss->GetBias(d, dsize);
+    bias = conf.loss->GetBias(*d, dsize);
     // only for server: store temp value of pred for all data points
     std::vector <ValueType> temp_pred(dsize, bias);
     // ptr protected by RW lock

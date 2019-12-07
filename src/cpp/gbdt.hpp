@@ -4,6 +4,7 @@
 
 #include "tree_seq.hpp"
 #include "concurrency.h"
+#include <thread>
 
 namespace gbdt {
   class GBDT {
@@ -41,7 +42,7 @@ namespace gbdt {
 
     void WorkerSide(int dsize);
 
-    void ServerSide(int dsize, int iter, std::vector <ValueType> &temp_pred, int num_threads);
+    void ServerSide(int dsize, int iter, std::vector <ValueType> &temp_pred);
 
 
     void ReleaseTrees() {
