@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
 
   int threads_wanted = 16;
   opt.Get("num_of_threads", &threads_wanted);
+  std::cout << "Use Threads: " << threads_wanted << std::endl;
   std::srand ( unsigned ( ::time(0) ) );
 
   Configure conf;
@@ -82,7 +83,7 @@ int main(int argc, char *argv[]) {
 
 //  gbdt.Fit(&d,threads_wanted);
   std::cout << "Start training..\n" << std::endl;
-  gbdt.Fit_Async(&d,threads_wanted);
+  gbdt.Fit_Async(&d, threads_wanted);
   std::cout << "training time: " << elapsed.Tell().ToMilliseconds() << " milliseconds" << std::endl;
   CleanDataVector(&d);
   FreeVector(&d);
