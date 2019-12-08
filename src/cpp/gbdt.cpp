@@ -24,9 +24,6 @@ namespace gbdt {
   }
 
   void GBDT::Init(DataVector &d) {
-    if (conf.enable_initial_guess) {
-      return;
-    }
     // this computes the weighted mean as init guess
     bias = conf.loss->GetBias(d, d.size());
     trees = new RegressionTree *[conf.num_trees];
@@ -220,7 +217,7 @@ namespace gbdt {
       }
       std::cout << "Finish updating for " << i << std::endl;
 
-                // build trees independently
+      // build trees independently
 #pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
       for (int j = 0; j < conf.num_of_threads; ++j) {
         // take a random sample
@@ -234,8 +231,8 @@ namespace gbdt {
           RegressionTree *iter_tree = trees[i * conf.num_of_threads + j];
           // fit a new tree based on updated target of tuples
           iter_tree->Fit(&sample, sample_sz);
-          std::cout << "Fit tree: " << i << ", " << j << std::endl;
-
+#pragma omp atomic
+          std::cout << "Fit: " << i << ", " << j << std::endl;
         }
       }
       std::cout << "Finish building trees for " << i << std::endl;
