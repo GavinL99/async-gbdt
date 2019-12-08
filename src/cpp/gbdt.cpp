@@ -14,7 +14,6 @@
 
 //#define NUM_INDEP_TREES 8
 //#define TREE_SAMPLE_THRESHOLD 0.3
-#define PRINT_TREE_INTERVAL 16
 
 namespace gbdt {
   GBDT::~GBDT() {
@@ -131,8 +130,8 @@ namespace gbdt {
       update_count += 1;
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
-        if (update_count % PRINT_TREE_INTERVAL == 0) {
-          std::cout << "iteration: " << update_count << ", time: " << fitting_time << " milliseconds" << ", loss: "
+        if (update_count % conf.num_of_threads == 0) {
+          std::cout << "Trees built: " << update_count << ", time: " << fitting_time << " milliseconds" << ", loss: "
           << GetLossSimple(data_ptr_, data_ptr_->size(), temp_pred) << std::endl;
         }
       }
@@ -215,7 +214,6 @@ namespace gbdt {
         }
         conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
       }
-      std::cout << "Finish updating for " << i << std::endl;
 
       int num_iter_tree = conf.num_of_threads;
       if ((i+1) * conf.num_of_threads > conf.num_trees) {
@@ -236,7 +234,6 @@ namespace gbdt {
         // fit a new tree based on updated target of tuples
         iter_tree->Fit(&sample, sample_sz);
       }
-      std::cout << "Finish building trees for " << i << std::endl;
 
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
