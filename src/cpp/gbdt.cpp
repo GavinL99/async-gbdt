@@ -223,7 +223,7 @@ namespace gbdt {
       }
 
       // build trees independently
-#pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
+#pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i, num_iter_tree) schedule(dynamic)
       for (int j = 0; j < num_iter_tree; ++j) {
         // take a random sample
         DataVector sample;
