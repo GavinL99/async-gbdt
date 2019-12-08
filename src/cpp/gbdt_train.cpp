@@ -53,9 +53,9 @@ int main(int argc, char *argv[]) {
   opt.Get("tree_sample", &conf.tree_sample);
   opt.Get("num_trees", &conf.num_trees);
 
-  std::string loss_type;
-  opt.Get("loss", &loss_type);
-//  std::string loss_type = "SquaredError";
+//  std::string loss_type;
+//  opt.Get("loss", &loss_type);
+  std::string loss_type = "SquaredError";
 
   std::string custom_loss_so;
   opt.Get("custom_loss_so", &custom_loss_so);
