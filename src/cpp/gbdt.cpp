@@ -231,7 +231,7 @@ namespace gbdt {
           RegressionTree *iter_tree = trees[i * conf.num_of_threads + j];
           // fit a new tree based on updated target of tuples
           iter_tree->Fit(&sample, sample_sz);
-#pragma omp atomic
+#pragma omp critical
           std::cout << "Fit: " << i << ", " << j << std::endl;
         }
       }
