@@ -234,6 +234,8 @@ namespace gbdt {
           RegressionTree *iter_tree = trees[i * conf.num_of_threads + j];
           // fit a new tree based on updated target of tuples
           iter_tree->Fit(&sample, sample_sz);
+          std::cout << "Fit tree: " << i << ", " << j << std::endl;
+
         }
       }
       std::cout << "Finish building trees for " << i << std::endl;
