@@ -90,6 +90,7 @@ namespace gbdt {
    * push it to the forest vector
    */
   void GBDT::WorkerSide(int dsize) {
+    int server_tree = 0;
     std::cout << "Worker Starts\n" << std::endl;
     int sample_sz = dsize * conf.tree_sample;
     DataVector sample;
@@ -106,8 +107,9 @@ namespace gbdt {
       iter_tree->Fit(&sample, sample_sz);
       trees_vec_.push_and_notify(iter_tree);
       sample.clear();
+      server_tree++;
     }
-    std::cout << "Worker joins\n" << std::endl;
+    std::cout << "Worker joins, trees generated: " << server_tree << std::endl;
   }
 
 /*
