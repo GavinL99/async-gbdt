@@ -180,8 +180,8 @@ namespace gbdt {
     server_finish_ = false;
 
     // Calculate gain
-    std::cout << "Processed trees in total: " << trees_vec_.get_processed() <<
-    " should be: " << conf.num_trees << std::endl;
+    std::cout << "Processed trees in total: "  << conf.num_trees <<
+    " total generated trees: " << trees_vec_.get_total_num() << std::endl;
     assert(trees_vec_.get_processed() >= conf.num_trees);
     std::cout << "Calculate gains...\n" << std::endl;
 

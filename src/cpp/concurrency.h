@@ -112,6 +112,8 @@ namespace gbdt {
 
     int get_processed() { return processed_; };
 
+    size_t get_total_num() { return list_.size(); };
+
     T* get_elem(int idx) {
       return list_[idx];
     }
