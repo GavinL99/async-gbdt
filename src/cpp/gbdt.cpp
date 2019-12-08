@@ -203,7 +203,7 @@ namespace gbdt {
     // store temp value of pred for all data points
     std::vector <ValueType> temp_pred(dsize, bias);
     // assume in each iteration, num_of_threads number of trees will be built
-    int iterations = conf.num_trees / conf.num_of_threads;
+    int iterations = (conf.num_trees - 1) / conf.num_of_threads + 1;
 
     for (size_t i = 0; i < iterations; ++i) {
       Elapsed elapsed;

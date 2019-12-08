@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   opt.AddOption("num_of_threads", "t", "num_of_threads", 1);
   opt.AddOption("feature_size", "f", "feature_size", OptionType::INT, true);
   opt.AddOption("max_depth", "d", "max_depth", 4);
-  opt.AddOption("iterations", "n", "iterations", 10);
+//  opt.AddOption("iterations", "n", "iterations", 10);
   opt.AddOption("shrinkage", "s", "shrinkage", 0.1);
   opt.AddOption("feature_ratio", "r", "feature_ratio", 1.0);
   opt.AddOption("data_ratio", "R", "data_ratio", 1.0);
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   opt.Get("num_of_threads", &conf.num_of_threads);
   opt.Get("feature_size", &conf.number_of_feature);
   opt.Get("max_depth", &conf.max_depth);
-  opt.Get("iterations", &conf.iterations);
+//  opt.Get("iterations", &conf.iterations);
   opt.Get("shrinkage", &conf.shrinkage);
   opt.Get("feature_ratio", &conf.feature_sample_ratio);
   opt.Get("data_ratio", &conf.data_sample_ratio);
