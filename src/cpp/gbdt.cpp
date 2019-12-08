@@ -218,8 +218,9 @@ namespace gbdt {
         }
         conf.loss->UpdateGradient(d->at(j), temp_pred[j]);
       }
+      std::cout << "Finish updating for " << i << std::endl;
 
-      // build trees independently
+                // build trees independently
 #pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
       for (int j = 0; j < conf.num_of_threads; ++j) {
         // take a random sample
@@ -235,6 +236,7 @@ namespace gbdt {
           iter_tree->Fit(&sample, sample_sz);
         }
       }
+      std::cout << "Finish building trees for " << i << std::endl;
 
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
