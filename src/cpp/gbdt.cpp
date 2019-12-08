@@ -225,7 +225,7 @@ namespace gbdt {
       for (int j = 0; j < conf.num_of_threads; ++j) {
         // take a random sample
         DataVector sample;
-        sample.reserve(dsize);
+        sample.reserve(sample_sz);
         // needs c++ 17
         std::sample(d->begin(), d->end(),
                     std::back_inserter(sample),
