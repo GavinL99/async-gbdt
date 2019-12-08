@@ -14,7 +14,7 @@
 
 //#define NUM_INDEP_TREES 8
 //#define TREE_SAMPLE_THRESHOLD 0.3
-#define PRINT_TREE_INTERVAL 50
+#define PRINT_TREE_INTERVAL 16
 
 namespace gbdt {
   GBDT::~GBDT() {
