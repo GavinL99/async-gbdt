@@ -57,7 +57,8 @@ Tuple* Tuple::FromString(const std::string &l,
     result->initial_guess = std::stod(tokens[cur++]);
   }
   result->label = std::stod(tokens[cur++]);
-  result->weight = std::stod(tokens[cur++]);
+//  result->weight = std::stod(tokens[cur++]);
+  result->weight = 1.0;
 
   // for two-class classifier, labels should be 1 or -1
   if (two_class_classification) {
