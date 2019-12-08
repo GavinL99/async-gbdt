@@ -217,9 +217,14 @@ namespace gbdt {
       }
       std::cout << "Finish updating for " << i << std::endl;
 
+      int num_iter_tree = conf.num_of_threads;
+      if ((i+1) * conf.num_of_threads > conf.num_trees) {
+        num_iter_tree = conf.num_trees - i * conf.num_of_threads;
+      }
+
       // build trees independently
 #pragma omp parallel for default(none) shared(trees, d, dsize, sample_sz, i) schedule(dynamic)
-      for (int j = 0; j < conf.num_of_threads; ++j) {
+      for (int j = 0; j < num_iter_tree; ++j) {
         // take a random sample
         DataVector sample;
         sample.reserve(sample_sz);
@@ -227,13 +232,9 @@ namespace gbdt {
         std::sample(d->begin(), d->end(),
                     std::back_inserter(sample),
                     sample_sz, std::mt19937{std::random_device{}()});
-        if (i * conf.num_of_threads + j < conf.num_trees) {
-          RegressionTree *iter_tree = trees[i * conf.num_of_threads + j];
-          // fit a new tree based on updated target of tuples
-          iter_tree->Fit(&sample, sample_sz);
-#pragma omp critical
-          std::cout << "Fit: " << i << ", " << j << std::endl;
-        }
+        RegressionTree *iter_tree = trees[i * conf.num_of_threads + j];
+        // fit a new tree based on updated target of tuples
+        iter_tree->Fit(&sample, sample_sz);
       }
       std::cout << "Finish building trees for " << i << std::endl;
 
