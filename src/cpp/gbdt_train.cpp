@@ -72,6 +72,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Objective function registered!\n" << std::endl;
   conf.loss.reset(objective);
 
+  std::cout << "Start loading data..\n" << std::endl;
   std::string train_file;
   opt.Get("train_file", &train_file);
   DataVector d;

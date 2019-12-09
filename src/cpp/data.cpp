@@ -71,6 +71,7 @@ Tuple* Tuple::FromString(const std::string &l,
       std::cerr << "feature value pair with wrong format: " << tokens[i];
       continue;
     }
+    // if the feature is indexed from 0
     size_t index = std::stoi(tokens[i].substr(0, found)) - 1;
     if (index >= n) {
       std::cerr << "feature index out of boundary: " << index;
