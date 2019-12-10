@@ -170,11 +170,19 @@ namespace gbdt {
       workers.push_back(std::thread([&] { this->WorkerSide(dsize); }));
     }
 
-    ServerSide(dsize, temp_pred);
-    std::thread([&] {this->ServerSide(dsize, temp_pred);});
     for (int i = 0; i < conf.num_of_threads - 1; i++) {
       workers[i].join();
     }
+
+    std::vector <std::thread> servers;
+    for (int wt = 0; wt < 2; wt++) {
+      servers.push_back(std::thread([&] {this->ServerSide(dsize, temp_pred);}));
+    }
+
+    for (int i = 0; i < 2; i++) {
+      servers[i].join();
+    }
+
     data_ptr_ = nullptr;
     server_finish_ = false;
 
