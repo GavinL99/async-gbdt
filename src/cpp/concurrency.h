@@ -10,6 +10,7 @@
 #include <mutex>
 #include "util.hpp"
 #include <cassert>
+#inlcude <atomic>
 
 
 namespace gbdt {
@@ -36,6 +37,9 @@ namespace gbdt {
      */
     void WLock() {
       uniq_lock latch(mutex_);
+      while (writer_entered_) {
+        reader_.wait(latch);
+      }
       writer_entered_ = true;
       while (reader_count_ > 0) {
         writer_.wait(latch);
@@ -128,7 +132,7 @@ namespace gbdt {
     std::vector<T*> list_;
     mutex_t latch_;
     cond_t cv_;
-    int processed_;
+    atomic<int> processed_;
   };
 
 
