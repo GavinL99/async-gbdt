@@ -68,7 +68,7 @@ Tuple* Tuple::FromString(const std::string &l,
   for (size_t i = cur; i < tokens.size(); ++i) {
     size_t found = tokens[i].find(kKVDelimiter);
     if (found == std::string::npos) {
-      std::cerr << "feature value pair with wrong format: " << tokens[i];
+      std::cerr << "feature value pair with wrong format: " << tokens[i] << std::endl;
       continue;
     }
     // if the feature is indexed from 0
