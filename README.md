@@ -41,12 +41,12 @@ We mainly refer to the following paper for asynchronous implementation of GBDT a
 
 ## Goals and Deliverables
 Through the process of completing the project, we plan on having finished the following:
-1. Have completed the OpenMP implementation
-2. Have completed the MPI implementation
-3. Have implemented the asynchronous GBDT with parameter server
-4.Experiment on different configurations of parameter server
-5. Compare the performance of async-GBDT with sequential / parallel implementations of our own and standard libraries like OpenCV and XGBoost on different types of dataset (size, sparsity, dimensions, etc.)
-6. Compare each implementation of GBDT in terms of speedup, communication time and accuracy
+* Have completed the OpenMP implementation
+* Have completed the MPI implementation
+* Have implemented the asynchronous GBDT with parameter server
+* Experiment on different configurations of parameter server
+* Compare the performance of async-GBDT with sequential / parallel implementations of our own and standard libraries like OpenCV and XGBoost on different types of dataset (size, sparsity, dimensions, etc.)
+* Compare each implementation of GBDT in terms of speedup, communication time and accuracy
 
 If all base goals are achieved, we plan on implementing additional parallel implementations using both an asynchronous and synchronous framework on CUDA. We believe that by doing so, we will have a more complete understanding of each parallel programming model's advantages and disadvantages.
 
