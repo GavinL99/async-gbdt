@@ -132,7 +132,7 @@ namespace gbdt {
     std::vector<T*> list_;
     mutex_t latch_;
     cond_t cv_;
-    atomic<int> processed_;
+    std::atomic<int> processed_;
   };
 
 
