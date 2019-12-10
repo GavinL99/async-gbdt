@@ -116,6 +116,7 @@ namespace gbdt {
  */
   void GBDT::ServerSide(int dsize, std::vector <ValueType> &temp_pred) {
     std::cout << "Server Starts\n" << std::endl;
+    int local_update = 0;
     assert(!server_finish_);
     while (trees_vec_.get_processed() < conf.num_trees) {
       Elapsed elapsed;
@@ -126,6 +127,7 @@ namespace gbdt {
         temp_pred[j] = PredictAsync(*(data_ptr_->at(j)), new_tree, temp_pred[j]);
         conf.loss->UpdateGradient(data_ptr_->at(j), temp_pred[j]);
       }
+      local_update += 1;
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
         if (trees_vec_.get_processed() % conf.num_of_threads == 0) {
@@ -136,6 +138,7 @@ namespace gbdt {
       data_ptr_lock_.WUnlock();
     }
     server_finish_ = true;
+    std::cout << "Local update server: " << local_update << std::endl;
   }
 
 
