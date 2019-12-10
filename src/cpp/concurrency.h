@@ -10,7 +10,7 @@
 #include <mutex>
 #include "util.hpp"
 #include <cassert>
-#inlcude <atomic>
+#include <atomic>
 
 
 namespace gbdt {
