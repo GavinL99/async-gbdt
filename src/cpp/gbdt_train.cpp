@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   opt.AddOption("use_async", "asy", "use_async", false);
   opt.AddOption("tree_sample", "ts", "tree_sample", 0.3);
   opt.AddOption("num_trees", "nt", "num_trees", 500);
-  opt.Get("num_servers", "ns", "num_servers", 1);
+  opt.AddOption("num_servers", "ns", "num_servers", 1);
 
   if (!opt.ParseOptions(argc, argv)) {
     opt.Help();
