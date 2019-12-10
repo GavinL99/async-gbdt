@@ -4,7 +4,8 @@ object_files = data.o math_util.o tree.o util.o config.o gbdt.o auc.o time.o los
 tests = data_unittest tree_unittest loss_unittest
 execs = gbdt_predict gbdt_train
 
-CXX = g++
+# CXX = g++
+CXX = /usr/local/depot/gcc-8.1/bin/g++
 # CXXFLAGS = -Wall -Wextra -Wconversion -pedantic -fopenmp -O2 -std=c++11 -fPIC
 # CXXFLAGS =  -Wextra -Wconversion -pedantic -fopenmp -O2 -DUSE_OPENMP -std=c++11 -fPIC
 CXXFLAGS = -Wall -fopenmp -DUSE_OPENMP -std=c++17 -g -O0 -fPIC
