@@ -1,4 +1,4 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
+
 
 #include "gbdt.hpp"
 #include <iostream>
@@ -105,9 +105,11 @@ int main(int argc, char *argv[]) {
   model_output << gbdt.Save(conf.use_async);
   std::cout << "Model saved...\n";
   double *g = gbdt.GetGain();
-  std::cout << "feature index\tfeature gain" << std::endl;
-  for (size_t i = 0; i < conf.number_of_feature; ++i) {
-    std::cout << i << "\t" << g[i] << std::endl;
+  if (conf.number_of_feature < 50) {
+    std::cout << "feature index\tfeature gain" << std::endl;
+    for (size_t i = 0; i < conf.number_of_feature; ++i) {
+      std::cout << i << "\t" << g[i] << std::endl;
+    }
   }
 
   return 0;

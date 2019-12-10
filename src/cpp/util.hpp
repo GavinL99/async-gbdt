@@ -1,4 +1,4 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
+
 
 #ifndef _UTIL_H_
 #define _UTIL_H_

@@ -1,4 +1,4 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
+
 
 #ifndef _DATA_H_
 #define _DATA_H_

@@ -1,4 +1,4 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
+
 
 #include "gbdt.hpp"
 #include <iostream>

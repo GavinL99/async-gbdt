@@ -1,4 +1,4 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
+
 
 #include "tree.hpp"
 #include "math_util.hpp"

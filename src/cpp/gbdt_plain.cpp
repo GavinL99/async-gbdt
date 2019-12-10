@@ -1,4 +1,4 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
+
 #include "gbdt_plain.hpp"
 #include "math_util.hpp"
 #include "util.hpp"

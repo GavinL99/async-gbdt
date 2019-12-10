@@ -1,4 +1,4 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
+
 
 #ifndef _AUC_H_
 #define _AUC_H_

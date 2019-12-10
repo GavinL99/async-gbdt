@@ -1,4 +1,3 @@
-// Author: qiyiping@gmail.com (Yiping Qi)
 
 #ifndef _TREE_H_
 #define _TREE_H_
