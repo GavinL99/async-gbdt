@@ -87,10 +87,11 @@ int main(int argc, char *argv[]) {
 
   Elapsed elapsed;
 
-  std::cout << "Start training, Async: " << conf.use_async << std::endl;
   if (conf.use_async) {
+    std::cout << "Start training Async, num of servers: " << conf.num_servers <<  std::endl;
     gbdt.Fit_Async(&d);
   } else {
+    std::cout << "Start training Sync" << std::endl;
     gbdt.Fit_OMP(&d);
   }
   std::cout << "training time: " << elapsed.Tell().ToMilliseconds() << " milliseconds" << std::endl;
