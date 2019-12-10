@@ -128,8 +128,8 @@ namespace gbdt {
       }
       long fitting_time = elapsed.Tell().ToMilliseconds();
       if (conf.debug) {
-        if (update_count % conf.num_of_threads == 0) {
-          std::cout << "Trees built: " << update_count << ", time: " << fitting_time << " milliseconds" << ", loss: "
+        if (trees_vec_.get_processed() % conf.num_of_threads == 0) {
+          std::cout << "Trees built: " << trees_vec_.get_processed() << ", time: " << fitting_time << " milliseconds" << ", loss: "
           << GetLossSimple(data_ptr_, data_ptr_->size(), temp_pred) << std::endl;
         }
       }
