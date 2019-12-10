@@ -165,21 +165,21 @@ namespace gbdt {
     std::cout << "Start launching threads..\n" << std::endl;
     // launch threads
     std::vector <std::thread> servers;
-    for (int wt = 0; wt < 2; wt++) {
+    int num_workers = conf.num_of_threads - conf.num_servers - 1;
+    for (int wt = 0; wt < conf.num_servers; wt++) {
       servers.push_back(std::thread([&] {this->ServerSide(dsize, temp_pred);}));
     }
-
     std::vector <std::thread> workers;
-    workers.reserve(conf.num_of_threads - 1);
-    for (int wt = 0; wt < conf.num_of_threads - 1; wt++) {
+    workers.reserve(num_workers);
+    for (int wt = 0; wt < num_workers; wt++) {
       workers.push_back(std::thread([&] { this->WorkerSide(dsize); }));
     }
 
-    for (int i = 0; i < conf.num_of_threads - 1; i++) {
+    // join threads
+    for (int i = 0; i < num_workers; i++) {
       workers[i].join();
     }
-
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < conf.num_servers; i++) {
       servers[i].join();
     }
 

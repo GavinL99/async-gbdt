@@ -38,6 +38,7 @@ class Configure {
   bool use_async; // whether to run in async
   double tree_sample; // % of dataset to use when fit a tree
   int num_trees;   // num of trees to build in total, this applies to both sync and async!
+  int num_servers;
 
   Configure():
       feature_sample_ratio(1),

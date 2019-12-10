@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
   opt.Get("use_async", &conf.use_async);
   opt.Get("tree_sample", &conf.tree_sample);
   opt.Get("num_trees", &conf.num_trees);
+  opt.Get("num_servers", &conf.num_servers);
 
 //  std::string loss_type;
 //  opt.Get("loss", &loss_type);
