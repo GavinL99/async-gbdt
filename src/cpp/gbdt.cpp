@@ -171,7 +171,7 @@ namespace gbdt {
     }
 
     ServerSide(dsize, temp_pred);
-    std::thread([&] {this->ServerSide(dsize, temp_pred)};);
+    std::thread([&] {this->ServerSide(dsize, temp_pred);});
     for (int i = 0; i < conf.num_of_threads - 1; i++) {
       workers[i].join();
     }
